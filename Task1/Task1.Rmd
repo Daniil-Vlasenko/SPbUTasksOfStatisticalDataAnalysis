@@ -1,0 +1,85 @@
+---
+title: "Task1"
+output: html_notebook
+---
+
+```{r}
+library("readxl")
+data <- read_excel("MY101.xls")
+description <- read_excel("iqrate_description.xlsx")
+```
+
+```{r}
+summary(data)[,1:101]
+```
+```{r}
+summary(data)[,102:202]
+```
+Зная, что разным людям свойственно либо давать заниженные, либо завышенные оценки, нормализуем оценки фильмов по каждому индивиду. В качестве метода нормализации выберем минимаксную нормализацию x_i=(x_i-min(x))/(max(x) - min(x))*12.
+https://wiki.loginom.ru/articles/data-normalization.html
+```{r}
+data$max <- apply(data[,1:101], 1, max, na.rm=TRUE)
+data$min <- apply(data[,1:101], 1, min, na.rm=TRUE)
+
+data[,1:101] <- apply(data[,1:101], 2, function(x) {(x - data$min) / (data$max - data$min) * 12})
+
+```
+
+Сконцентрируем внимание на том, как психотип личности влияет на предпочтение в фильмах. Обратим внимание на корреляции, связанные с тестами Кейриси, так как эти признаки имеют наименьшее число пропусков из подобных им.
+```{r}
+summary(data)[,104:107]
+```
+
+```{r}
+x <- c(1,243,2344,23,4)
+x <- factor(x)
+x
+```
+
+Предположение. "Скписок шиндлера" больше нравится интровертным личностям, так как это драма. 
+```{r}
+library(dplyr)
+library(ggplot2)
+
+datanew <- data %>% filter(!is.na(E_I__КЕЙ), !is.na(СПИСОК_Ш))
+points <- data.frame(xyTable(datanew$E_I__КЕЙ, datanew$СПИСОК_Ш))
+colnames(points)[3] <- "size"
+points$x <- factor(points$x)
+count <- data.frame(table(points$x))
+colnames(count)[1] <- "x"
+colnames(count)[2] <- "number"
+
+
+points <- inner_join(points, count, by = "x")
+ggplot(points, aes(x = x, y = y)) + 
+  geom_point(aes(size = size)) +
+  xlab("Степень интровертности пользователя") + 
+  ylab("Оценка Списока Шиндлера")
+
+points$size <- points$size / points$number
+
+ggplot(points, aes(x = x, y = y)) + 
+  geom_point(aes(size = size)) +
+  xlab("Степень интровертности пользователя") + 
+  ylab("Оценка Списока Шиндлера")
+```
+Корреляций не видно. Это наталкивает на мысль проверить есть ли вообще заментные корреляции между тестами и фильмами.
+```{r}
+
+data.new <- expand.grid(x=colnames(data)[1:202], y=colnames(data)[1:202])
+data.new
+#apply(data.new, 2, function(row) {print(row)})
+
+
+cor(data[,1], data[,2], method="spearman")
+
+# Heatmap 
+#ggplot(df, aes(X, Y, fill= Z)) + 
+#  geom_tile()
+```
+
+
+
+
+
+
