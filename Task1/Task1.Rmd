@@ -29,13 +29,6 @@ data[,1:101] <- apply(data[,1:101], 2, function(x) {(x - data$min) / (data$max -
 ```{r}
 summary(data)[,104:107]
 ```
-
-```{r}
-x <- c(1,243,2344,23,4)
-x <- factor(x)
-x
-```
-
 Предположение. "Скписок шиндлера" больше нравится интровертным личностям, так как это драма. 
 ```{r}
 library(dplyr)
@@ -63,18 +56,27 @@ ggplot(points, aes(x = x, y = y)) +
   xlab("Степень интровертности пользователя") + 
   ylab("Оценка Списока Шиндлера")
 ```
-Корреляций не видно. Это наталкивает на мысль проверить есть ли вообще заментные корреляции между тестами и фильмами.
+Корреляций не видно. Это наталкивает на мысль проверить, есть ли вообще корреляции между тестами и фильмами.
+```{r}
+library(reshape)
+
+#correlation <- melt(cor(data, method="spearman", use="pairwise.complete.obs"))
+
+ggplot(correlation, aes(X1, X2, fill= value)) + 
+  geom_tile() +
+  scale_fill_gradient(low="white", high="black") +
+  xlab("x") + 
+  ylab("y") +
+  theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), axis.ticks.y=element_blank())
+```
+
+
+
 ```{r}
 
-data.new <- expand.grid(x=colnames(data)[1:202], y=colnames(data)[1:202])
-data.new
-#apply(data.new, 2, function(row) {print(row)})
 
-cor(data[,1], data[,2], method="spearman")
 
-# Heatmap 
-#ggplot(df, aes(X, Y, fill= Z)) + 
-#  geom_tile()
 ```
 
 
