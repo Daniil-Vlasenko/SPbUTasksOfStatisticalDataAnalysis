@@ -45,7 +45,7 @@ points <- inner_join(points, count, by = "x")
 ggplot(points, aes(x = x, y = y)) + 
   geom_point(aes(size = size), alpha = 0.5) +
   xlab("Степень интровертности пользователя") + 
-  ylab("Оценка Списока Шиндлера")
+  ylab("Оценка Списка Шиндлера")
 
 points$size <- points$size / points$number
 
@@ -53,7 +53,7 @@ points$size <- points$size / points$number
 ggplot(points, aes(x = x, y = y)) + 
   geom_point(aes(size = size), alpha = 0.5) +
   xlab("Степень интровертности пользователя") + 
-  ylab("Оценка Списока Шиндлера")
+  ylab("Оценка Списка Шиндлера")
 ```
 Корреляций не видно. Это наталкивает на мысль проверить, есть ли вообще корреляции между тестами и фильмами. *О существовании следующего графика я узнал от Егора.*
 ```{r}
