@@ -45,18 +45,19 @@ colnames(count)[2] <- "number"
 
 points <- inner_join(points, count, by = "x")
 ggplot(points, aes(x = x, y = y)) + 
-  geom_point(aes(size = size)) +
+  geom_point(aes(size = size), alpha = 0.5) +
   xlab("Степень интровертности пользователя") + 
   ylab("Оценка Списока Шиндлера")
 
 points$size <- points$size / points$number
 
+# Тут вопрос.
 ggplot(points, aes(x = x, y = y)) + 
-  geom_point(aes(size = size)) +
+  geom_point(aes(size = size), alpha = 0.5) +
   xlab("Степень интровертности пользователя") + 
   ylab("Оценка Списока Шиндлера")
 ```
-Корреляций не видно. Это наталкивает на мысль проверить, есть ли вообще корреляции между тестами и фильмами.
+Корреляций не видно. Это наталкивает на мысль проверить, есть ли вообще корреляции между тестами и фильмами. *О существовании следующего графика я узнал от Егора.*
 ```{r}
 library(reshape)
 
@@ -70,14 +71,43 @@ ggplot(correlation, aes(X1, X2, fill= value)) +
   theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), 
         axis.text.y=element_blank(), axis.ticks.y=element_blank())
 ```
-
-
+Можно заметить, что корреляций между тестами и оценками фильмов нет. Значит нужно иссследовать корреляции между фильмами. Поэтому рекомендательные системы основаны в основном на данных оценках фильмов. Но о корреляциях между фильмами, скорее всего, кто-то расскажет. Посмотрим на имеющиеся корреляции между тестами.
 
 ```{r}
+library(reshape)
 
+correlation <- melt(cor(data[124:137], method="spearman", use="pairwise.complete.obs"))
 
-
+ggplot(correlation, aes(X1, X2, fill= value)) + 
+  geom_tile() +
+  scale_fill_gradient(low="white", high="black") +
+  xlab("x") + 
+  ylab("y") +
+  theme(axis.text.x = element_text(angle=90))
 ```
+```{r}
+summary(data)[,124:137]
+```
+```{r}
+library(GGally)
+# Видимо нельзя выбрать метод подсчета корреляции.
+ggpairs(select(data, IQ, МАТЕМАТ1, МАТЕМАТ2), 
+        diag = list(continuous = "barDiag")) 
+```
+В целях выполнения плана по количеству графиков, рассмотрим связь практических и теоретических знаний математики получше.
+```{r}
+library(ggExtra)
+p <- ggplot(select(data, МАТЕМАТ1, МАТЕМАТ2), aes(x=МАТЕМАТ1, y=МАТЕМАТ2)) +
+    geom_point() +
+    geom_smooth(method=loess , color="black", se=TRUE) +
+  xlab("Математические способности (пр. мышление)") + 
+  ylab("Математические способности (теор. мышление)")
+ggMarginal(p, type="boxplot")
+```
+
+
+
+
 
 
 
