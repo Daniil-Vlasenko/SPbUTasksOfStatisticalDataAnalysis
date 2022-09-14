@@ -22,9 +22,7 @@ data$max <- apply(data[,1:101], 1, max, na.rm=TRUE)
 data$min <- apply(data[,1:101], 1, min, na.rm=TRUE)
 
 data[,1:101] <- apply(data[,1:101], 2, function(x) {(x - data$min) / (data$max - data$min) * 12})
-
 ```
-
 Сконцентрируем внимание на том, как психотип личности влияет на предпочтение в фильмах. Обратим внимание на корреляции, связанные с тестами Кейриси, так как эти признаки имеют наименьшее число пропусков из подобных им.
 ```{r}
 summary(data)[,104:107]
@@ -65,9 +63,7 @@ library(reshape)
 
 ggplot(correlation, aes(X1, X2, fill= value)) + 
   geom_tile() +
-  scale_fill_gradient(low="white", high="black") +
-  xlab("x") + 
-  ylab("y") +
+  scale_fill_gradient(low="white", high="blue") +
   theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), 
         axis.text.y=element_blank(), axis.ticks.y=element_blank())
 ```
@@ -76,14 +72,13 @@ ggplot(correlation, aes(X1, X2, fill= value)) +
 ```{r}
 library(reshape)
 
-correlation <- melt(cor(data[124:137], method="spearman", use="pairwise.complete.obs"))
+correlation.new <- melt(cor(data[124:137], method="spearman", use="pairwise.complete.obs"))
 
-ggplot(correlation, aes(X1, X2, fill= value)) + 
+ggplot(correlation.new, aes(X1, X2, fill= value)) + 
   geom_tile() +
   scale_fill_gradient(low="white", high="black") +
-  xlab("x") + 
-  ylab("y") +
-  theme(axis.text.x = element_text(angle=90))
+  theme(axis.text.x = element_text(angle=90)) +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
 ```
 ```{r}
 summary(data)[,124:137]
@@ -92,7 +87,8 @@ summary(data)[,124:137]
 library(GGally)
 # Видимо нельзя выбрать метод подсчета корреляции.
 ggpairs(select(data, IQ, МАТЕМАТ1, МАТЕМАТ2), 
-        diag = list(continuous = "barDiag")) 
+        diag = list(continuous = "barDiag"),
+        columnLabels = c("IQ","Мат. споc. (пр. м.)","Мат. споc. (т. м.)"))
 ```
 В целях выполнения плана по количеству графиков, рассмотрим связь практических и теоретических знаний математики получше.
 ```{r}
@@ -100,17 +96,7 @@ library(ggExtra)
 p <- ggplot(select(data, МАТЕМАТ1, МАТЕМАТ2), aes(x=МАТЕМАТ1, y=МАТЕМАТ2)) +
     geom_point() +
     geom_smooth(method=loess , color="black", se=TRUE) +
-  xlab("Математические способности (пр. мышление)") + 
-  ylab("Математические способности (теор. мышление)")
+  xlab("Математические способности (пр. мышление)") +
+  ylab("Математические способности (теоретическое мышление)")
 ggMarginal(p, type="boxplot")
 ```
-
-
-
-
-
-
-
-
-
-
