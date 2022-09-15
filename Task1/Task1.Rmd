@@ -63,7 +63,7 @@ library(reshape)
 
 ggplot(correlation, aes(X1, X2, fill= value)) + 
   geom_tile() +
-  scale_fill_gradient(low="white", high="blue") +
+  scale_fill_gradient(low="yellow", high="blue") +
   theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), 
         axis.text.y=element_blank(), axis.ticks.y=element_blank())
 ```
@@ -96,7 +96,30 @@ library(ggExtra)
 p <- ggplot(select(data, МАТЕМАТ1, МАТЕМАТ2), aes(x=МАТЕМАТ1, y=МАТЕМАТ2)) +
     geom_point() +
     geom_smooth(method=loess , color="black", se=TRUE) +
-  xlab("Математические способности (пр. мышление)") +
-  ylab("Математические способности (теоретическое мышление)")
+    xlab("Математические способности (пр. мышление)") +
+    ylab("Математические способности (теор. мышление)")
 ggMarginal(p, type="boxplot")
 ```
+Предположение. Сущетсвует не одна мода в знаниях математики.
+```{r}
+library(hexbin)
+ggplot(select(data, МАТЕМАТ1, МАТЕМАТ2), aes(x=МАТЕМАТ1, y=МАТЕМАТ2)) +
+    stat_density_2d(aes(fill = ..level..), geom = "polygon") +
+    xlab("Математические способности (пр. мышление)") +
+    ylab("Математические способности (теор. мышление)") +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0))
+ggplot(select(data, МАТЕМАТ1, МАТЕМАТ2), aes(x=МАТЕМАТ1, y=МАТЕМАТ2)) +
+    stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+    xlab("Математические способности (пр. мышление)") +
+    ylab("Математические способности (теор.мышление)") +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0))
+ 
+```
+
+
+
+
+
+
