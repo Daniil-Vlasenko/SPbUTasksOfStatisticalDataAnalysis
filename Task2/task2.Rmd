@@ -1,0 +1,43 @@
+---
+title: "Task2"
+output: html_document
+---
+```{r}
+library(readxl)
+library(dplyr)
+library(tidyr)
+df <- read_excel("CARDATA.xls")  %>% drop_na() %>% select(-MAKE, -MODEL) %>%
+      mutate(ROW = NULL, CYLINDER = as.factor(CYLINDER), 
+             YEAR = as.factor(YEAR), ORIGIN = as.factor(ORIGIN))
+head(data)
+```
+
+```{r, message = FALSE}
+library(ggplot2)
+library(GGally)
+df %>% select(-CYLINDER, -YEAR, -ORIGIN) %>% ggpairs(diag=list(continuous = "barDiag"))
+```
+```{r,  message = FALSE}
+dfLog <- df %>% mutate(MPG = log(MPG), DISPLACE = log(DISPLACE), 
+                         HORSEPOW = log(HORSEPOW), ACCEL = log(ACCEL), 
+                         WEIGHT = log(WEIGHT), PRICE = log(PRICE))
+dfLog %>% select(-CYLINDER, -YEAR, -ORIGIN) %>% ggpairs(diag=list(continuous = "barDiag"))
+```
+```{r}
+library(ggpubr)
+MPG <- dfLog %>% ggplot(aes(y=MPG)) + geom_boxplot()
+DISPLACE <- dfLog %>% ggplot(aes(y=DISPLACE)) + geom_boxplot()
+HORSEPOW <- dfLog %>% ggplot(aes(y=HORSEPOW)) + geom_boxplot()
+ACCEL <- dfLog %>% ggplot(aes(y=ACCEL)) + geom_boxplot()
+WEIGHT <- dfLog %>% ggplot(aes(y=WEIGHT)) + geom_boxplot()
+PRICE <- dfLog %>% ggplot(aes(y=PRICE)) + geom_boxplot()
+
+ggarrange(MPG, DISPLACE, HORSEPOW, ACCEL, WEIGHT, PRICE,
+          ncol = 3, nrow = 2)
+```
+
+
+
+
+
+
