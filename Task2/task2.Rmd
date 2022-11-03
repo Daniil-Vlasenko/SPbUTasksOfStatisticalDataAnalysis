@@ -60,32 +60,32 @@ library(reshape)
 
 ggplot(melt(cor(select(df, -CYLINDER, -YEAR, -ORIGIN), method = "pearson")), aes(X1, X2)) +
   geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 1))) +
+  geom_text(aes(label = round(value, 3))) +
   scale_fill_gradient2(low=colors()[143], mid='white', high=colors()[639]) + 
   ggtitle("pearson")
 ggplot(melt(cor(select(dfLog, -CYLINDER, -YEAR, -ORIGIN), method = "pearson")), aes(X1, X2)) +
   geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 1))) +
+  geom_text(aes(label = round(value, 3))) +
   scale_fill_gradient2(low=colors()[143], mid='white', high=colors()[639]) + 
   ggtitle("pearson log")
 ggplot(melt(cor(select(df, -CYLINDER, -YEAR, -ORIGIN), method = "spearman")), aes(X1, X2)) +
   geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 1))) +
+  geom_text(aes(label = round(value, 3))) +
   scale_fill_gradient2(low=colors()[143], mid='white', high=colors()[639]) +
   ggtitle("spearman")
 ggplot(melt(cor(select(dfLog, -CYLINDER, -YEAR, -ORIGIN), method = "spearman")), aes(X1, X2)) +
   geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 1))) +
+  geom_text(aes(label = round(value, 3))) +
   scale_fill_gradient2(low=colors()[143], mid='white', high=colors()[639]) +
   ggtitle("spearman log")
 ggplot(melt(cor(select(df, -CYLINDER, -YEAR, -ORIGIN), method = "kendall")), aes(X1, X2)) +
   geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 1))) +
+  geom_text(aes(label = round(value, 3))) +
   scale_fill_gradient2(low=colors()[143], mid='white', high=colors()[639]) +
   ggtitle("kendall")
 ggplot(melt(cor(select(dfLog, -CYLINDER, -YEAR, -ORIGIN), method = "kendall")), aes(X1, X2)) +
   geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 1))) +
+  geom_text(aes(label = round(value, 3))) +
   scale_fill_gradient2(low=colors()[143], mid='white', high=colors()[639]) +
   ggtitle("kendall log")
 ```
@@ -96,7 +96,7 @@ ggplot(melt(cor(select(dfLog, -CYLINDER, -YEAR, -ORIGIN), method = "kendall")), 
 ```{r}
 library(ggpubr)
 
-# dfLog[1,9] <- 100
+#dfLog[1,9] <- 100
 
 MPG <- dfLog %>% ggplot(aes(y=MPG)) + geom_boxplot()
 DISPLACE <- dfLog %>% ggplot(aes(y=DISPLACE)) + geom_boxplot()
