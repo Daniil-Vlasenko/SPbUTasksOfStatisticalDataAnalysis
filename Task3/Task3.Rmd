@@ -51,6 +51,23 @@ df %>% select(-NAME) %>%
           columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
 ```
 
+```{r, warning=FALSE, message = FALSE}
+library(reshape)
+```
+
+```{r, warning=FALSE, message = FALSE}
+ggplot(melt(cor(select(df, -NAME, -PRED_IND, -EXP_IND, -DANG_IND), method = "pearson")), aes(X1, X2)) +
+  geom_raster(aes(fill = value)) +
+  geom_text(aes(label = round(value, 3))) +
+  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
+  ggtitle("pearson")
+ggplot(melt(cor(select(df, -NAME, -PRED_IND, -EXP_IND, -DANG_IND), method = "spearman")), aes(X1, X2)) +
+  geom_raster(aes(fill = value)) +
+  geom_text(aes(label = round(value, 3))) +
+  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
+  ggtitle("spearman")
+
+```
 
 
 
