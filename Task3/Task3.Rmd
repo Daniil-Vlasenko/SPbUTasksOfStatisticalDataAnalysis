@@ -8,15 +8,15 @@ date: "2022-11-11"
 Уберем разделение сна на две стадии, так как много пропусков, удалим всех индивидов 
 с NA. Переведем вес животного в граммы и логорифмируем вес животного и вес мозга, чтобы 
 слоны так сильно не выделялись на фоне остальных животных, и факторизуем индексы.
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(readxl)
 library(dplyr)
 library(tidyr)
 ```
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 df <- read_excel("Sleep/SLEEP_shortname.xls") %>% 
-  select(-SLOWWAVE, -PARADOX)
+  dplyr::select(-SLOWWAVE, -PARADOX)
 df[df < 0] <- NA
 df <- df %>%  drop_na() %>%
   mutate(PRED_IND = as.factor(PRED_IND), EXP_IND = as.factor(EXP_IND), 
@@ -30,23 +30,23 @@ head(df)
 Гипотеза 2. Животные, находящиеся в большей опасности во время, сна спят меньше.
 
 Посмотрим на корреляции.
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE}
 library(ggplot2)
 library(GGally)
 
 ```
 
 ```{r, message=FALSE, warning=FALSE}
-df %>% select(-NAME) %>%
+df %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), 
           columns = c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
-df %>% select(-NAME) %>%
+df %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), aes(colour=PRED_IND), legend=1,
           columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
-df %>% select(-NAME) %>%
+df %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), aes(colour=EXP_IND), legend=1,
           columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
-df %>% select(-NAME) %>%
+df %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), aes(colour=DANG_IND), legend=1,
           columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
 ```
@@ -56,12 +56,12 @@ library(reshape)
 ```
 
 ```{r, warning=FALSE, message = FALSE}
-ggplot(melt(cor(select(df, -NAME, -PRED_IND, -EXP_IND, -DANG_IND), method = "pearson")), aes(X1, X2)) +
+ggplot(melt(cor(dplyr::select(df, -NAME, -PRED_IND, -EXP_IND, -DANG_IND), method = "pearson")), aes(X1, X2)) +
   geom_raster(aes(fill = value)) +
   geom_text(aes(label = round(value, 3))) +
   scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
   ggtitle("pearson")
-ggplot(melt(cor(select(df, -NAME, -PRED_IND, -EXP_IND, -DANG_IND), method = "spearman")), aes(X1, X2)) +
+ggplot(melt(cor(dplyr::select(df, -NAME, -PRED_IND, -EXP_IND, -DANG_IND), method = "spearman")), aes(X1, X2)) +
   geom_raster(aes(fill = value)) +
   geom_text(aes(label = round(value, 3))) +
   scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
@@ -69,6 +69,22 @@ ggplot(melt(cor(select(df, -NAME, -PRED_IND, -EXP_IND, -DANG_IND), method = "spe
 
 ```
 
+```{r, warning=FALSE, message = FALSE}
+library(ppcor)
+```
+
+```{r, warning=FALSE, message = FALSE}
+ggplot(melt(pcor(dplyr::select(df, -NAME, -PRED_IND, -EXP_IND, -DANG_IND), method = "pearson")$estimate), aes(X1, X2)) +
+  geom_raster(aes(fill = value)) +
+  geom_text(aes(label = round(value, 3))) +
+  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
+  ggtitle("pearson")
+ggplot(melt(pcor(dplyr::select(df, -NAME, -PRED_IND, -EXP_IND, -DANG_IND), method = "spearman")$estimate), aes(X1, X2)) +
+  geom_raster(aes(fill = value)) +
+  geom_text(aes(label = round(value, 3))) +
+  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
+  ggtitle("spearman")
+```
 
 
 
