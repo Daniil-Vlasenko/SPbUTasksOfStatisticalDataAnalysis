@@ -1,0 +1,59 @@
+---
+title: "Task3"
+output: html_document
+date: "2022-11-11"
+---
+
+# 1. Прочитаем и обработаем данные.
+Уберем разделение сна на две стадии, так как много пропусков, удалим всех индивидов 
+с NA. Переведем вес животного в граммы и логорифмируем вес животного и вес мозга, чтобы 
+слоны так сильно не выделялись на фоне остальных животных, и факторизуем индексы.
+```{r}
+library(readxl)
+library(dplyr)
+library(tidyr)
+```
+
+```{r}
+df <- read_excel("Sleep/SLEEP_shortname.xls") %>% 
+  select(-SLOWWAVE, -PARADOX)
+df[df < 0] <- NA
+df <- df %>%  drop_na() %>%
+  mutate(PRED_IND = as.factor(PRED_IND), EXP_IND = as.factor(EXP_IND), 
+         DANG_IND = as.factor(DANG_IND), BODY_WEI = log(BODY_WEI * 1000), 
+         BRAIN_WE = log(BRAIN_WE), LIFESPAN = log(LIFESPAN * 365.25),
+         GESTTIME = log(GESTTIME))
+
+head(df)
+```
+Гипотеза 1. Большому животному необходимо спать больше чем небольшому животному.
+Гипотеза 2. Животные, находящиеся в большей опасности во время, сна спят меньше.
+
+Посмотрим на корреляции.
+```{r, message=FALSE}
+library(ggplot2)
+library(GGally)
+
+```
+
+```{r, message=FALSE, warning=FALSE}
+df %>% select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), 
+          columns = c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
+df %>% select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), aes(colour=PRED_IND), legend=1,
+          columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
+df %>% select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), aes(colour=EXP_IND), legend=1,
+          columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
+df %>% select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), aes(colour=DANG_IND), legend=1,
+          columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
+```
+
+
+
+
+
+
+
