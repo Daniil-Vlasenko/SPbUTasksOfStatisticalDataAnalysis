@@ -79,33 +79,34 @@ ggplot(aes(X1, X2)) +
   scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
   ggtitle("spearman")
 ```
-Посмотрим на частные корреляции.
+Посмотрим на частную корреляцию веса животного и сна за вычетом идексов опасности.
 ```{r, warning=FALSE, message = FALSE}
 library(ppcor)
 ```
 
 ```{r, warning=FALSE, message = FALSE}
-(dplyr::select(df, -NAME, -BRAIN_WE, -LIFESPAN, -GESTTIME) %>%
-mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
-pcor(method = "pearson"))$estimate %>%
-melt() %>%
-ggplot(aes(X1, X2)) +
-  geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 3))) +
-  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
-  ggtitle("pearson")
-
-(dplyr::select(df, -NAME) %>%
+((dplyr::select(df, -NAME, -BRAIN_WE, -LIFESPAN, -GESTTIME) %>%
 mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
 pcor(method = "spearman"))$estimate %>%
-melt() %>%
-ggplot(aes(X1, X2)) +
-  geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 3))) +
-  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
-  ggtitle("spearman")
+as.data.frame())["SLEEP", "BODY_WEI"]
 ```
-Особо ничего 
+Посмотрим на частную корреляцию индексов опасности животного и сна за вычетом веса.
+```{r, warning=FALSE, message = FALSE}
+((dplyr::select(df, -NAME, -EXP_IND, -DANG_IND) %>%
+mutate(PRED_IND = as.numeric(PRED_IND)) %>%
+pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["SLEEP", "PRED_IND"]
+
+((dplyr::select(df, -NAME, -PRED_IND, -DANG_IND) %>%
+mutate(EXP_IND = as.numeric(EXP_IND)) %>%
+pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["SLEEP", "EXP_IND"]
+
+((dplyr::select(df, -NAME, -EXP_IND, -PRED_IND) %>%
+mutate(DANG_IND = as.numeric(DANG_IND)) %>%
+pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["SLEEP", "DANG_IND"]
+```
 
 
 
