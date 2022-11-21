@@ -179,6 +179,16 @@ library(ppcor)
 mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
 pcor(method = "spearman"))$estimate %>%
 as.data.frame())["SLEEP", "BODY_WEI"]
+
+((dplyr::select(dfSlowwave, -NAME, -BRAIN_WE, -LIFESPAN, -GESTTIME) %>%
+mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
+pcor(method = "spearman"))$estimate %>%
+as.data.frame())["SLOWWAVE", "BODY_WEI"]
+
+((dplyr::select(dfParadox, -NAME, -BRAIN_WE, -LIFESPAN, -GESTTIME) %>%
+mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
+pcor(method = "spearman"))$estimate %>%
+as.data.frame())["PARADOX", "BODY_WEI"]
 ```
 Посмотрим на частную корреляцию индексов опасности животного и сна за вычетом веса.
 ```{r, warning=FALSE, message = FALSE}
@@ -198,6 +208,39 @@ pcor(method = "spearman"))$estimate %>%
 as.data.frame())["SLEEP", "DANG_IND"]
 ```
 
+```{r, warning=FALSE, message = FALSE}
+((dplyr::select(dfSlowwave, -NAME, -EXP_IND, -DANG_IND) %>%
+mutate(PRED_IND = as.numeric(PRED_IND)) %>%
+pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["SLOWWAVE", "PRED_IND"]
+
+((dplyr::select(dfSlowwave, -NAME, -PRED_IND, -DANG_IND) %>%
+mutate(EXP_IND = as.numeric(EXP_IND)) %>%
+pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["SLOWWAVE", "EXP_IND"]
+
+((dplyr::select(dfSlowwave, -NAME, -EXP_IND, -PRED_IND) %>%
+mutate(DANG_IND = as.numeric(DANG_IND)) %>%
+pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["SLOWWAVE", "DANG_IND"]
+```
+
+```{r, warning=FALSE, message = FALSE}
+((dplyr::select(dfParadox, -NAME, -EXP_IND, -DANG_IND) %>%
+mutate(PRED_IND = as.numeric(PRED_IND)) %>%
+pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["PARADOX", "PRED_IND"]
+
+((dplyr::select(dfParadox, -NAME, -PRED_IND, -DANG_IND) %>%
+mutate(EXP_IND = as.numeric(EXP_IND)) %>%
+pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["PARADOX", "EXP_IND"]
+
+((dplyr::select(dfParadox, -NAME, -EXP_IND, -PRED_IND) %>%
+mutate(DANG_IND = as.numeric(DANG_IND)) %>%
+pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["PARADOX", "DANG_IND"]
+```
 
 
 
