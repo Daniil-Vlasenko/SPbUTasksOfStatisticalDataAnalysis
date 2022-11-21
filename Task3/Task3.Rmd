@@ -15,43 +15,88 @@ library(tidyr)
 ```
 
 ```{r, message=FALSE, warning=FALSE}
-df <- read_excel("Sleep/SLEEP_shortname.xls") %>% 
-  dplyr::select(-SLOWWAVE, -PARADOX)
+df <- read_excel("Sleep/SLEEP_shortname.xls")
 df[df < 0] <- NA
-df <- df %>%  drop_na() %>%
+
+dfSleep <- df %>% dplyr::select(-SLOWWAVE, -PARADOX) %>% 
+  drop_na() %>%
   mutate(PRED_IND = as.factor(PRED_IND), EXP_IND = as.factor(EXP_IND),
-         DANG_IND = as.factor(DANG_IND), BODY_WEI = log(BODY_WEI * 1000),
-         BRAIN_WE = log(BRAIN_WE), LIFESPAN = log(LIFESPAN * 365.25),
-         GESTTIME = log(GESTTIME))
-# df <- df %>%  drop_na() %>%
-#   mutate(BODY_WEI = log(BODY_WEI * 1000), BRAIN_WE = log(BRAIN_WE), 
-#          LIFESPAN = log(LIFESPAN * 365.25), GESTTIME = log(GESTTIME))
+         DANG_IND = as.factor(DANG_IND), 
+         BODY_WEI = log(BODY_WEI * 1000), BRAIN_WE = log(BRAIN_WE), 
+         LIFESPAN = log(LIFESPAN * 365.25), GESTTIME = log(GESTTIME))
+
+dfSlowwave <- df %>% dplyr::select(-SLEEP, -PARADOX) %>% 
+  drop_na() %>%
+  mutate(PRED_IND = as.factor(PRED_IND), EXP_IND = as.factor(EXP_IND),
+         DANG_IND = as.factor(DANG_IND), 
+         BODY_WEI = log(BODY_WEI * 1000), BRAIN_WE = log(BRAIN_WE), 
+         LIFESPAN = log(LIFESPAN * 365.25), GESTTIME = log(GESTTIME))
+
+dfParadox <- df %>% dplyr::select(-SLEEP, -SLOWWAVE) %>% 
+  drop_na() %>%
+  mutate(PRED_IND = as.factor(PRED_IND), EXP_IND = as.factor(EXP_IND),
+         DANG_IND = as.factor(DANG_IND), 
+         BODY_WEI = log(BODY_WEI * 1000), BRAIN_WE = log(BRAIN_WE), 
+         LIFESPAN = log(LIFESPAN * 365.25), GESTTIME = log(GESTTIME))
+
 
 head(df)
+length(dfSleep$NAME)
+length(dfSlowwave$NAME)
+length(dfParadox$NAME)
 ```
 Гипотеза 1. Большому животному необходимо спать больше чем небольшому животному.
 Гипотеза 2. Животные, находящиеся в большей опасности во время, сна спят меньше.
 
-Посмотрим на корреляции.
+Посмотрим на корреляции в трех датасетах.
 ```{r, message=FALSE, warning=FALSE}
 library(ggplot2)
 library(GGally)
-
 ```
 
 ```{r, message=FALSE, warning=FALSE}
-df %>% dplyr::select(-NAME) %>%
+dfSleep %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), 
           columns = c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
-df %>% dplyr::select(-NAME) %>%
+dfSleep %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), aes(colour=PRED_IND), legend=1,
           columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
-df %>% dplyr::select(-NAME) %>%
+dfSleep %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), aes(colour=EXP_IND), legend=1,
           columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
-df %>% dplyr::select(-NAME) %>%
+dfSleep %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), aes(colour=DANG_IND), legend=1,
           columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
+```
+
+```{r, message=FALSE, warning=FALSE}
+dfSlowwave %>% dplyr::select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), 
+          columns = c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "LIFESPAN", "GESTTIME"))
+dfSlowwave %>% dplyr::select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), aes(colour=PRED_IND), legend=1,
+          columns=c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "LIFESPAN", "GESTTIME"))
+dfSlowwave %>% dplyr::select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), aes(colour=EXP_IND), legend=1,
+          columns=c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "LIFESPAN", "GESTTIME"))
+dfSlowwave %>% dplyr::select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), aes(colour=DANG_IND), legend=1,
+          columns=c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "LIFESPAN", "GESTTIME"))
+```
+
+```{r, message=FALSE, warning=FALSE}
+dfParadox %>% dplyr::select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), 
+          columns = c("BODY_WEI", "BRAIN_WE", "PARADOX", "LIFESPAN", "GESTTIME"))
+dfParadox %>% dplyr::select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), aes(colour=PRED_IND), legend=1,
+          columns=c("BODY_WEI", "BRAIN_WE", "PARADOX", "LIFESPAN", "GESTTIME"))
+dfParadox %>% dplyr::select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), aes(colour=EXP_IND), legend=1,
+          columns=c("BODY_WEI", "BRAIN_WE", "PARADOX", "LIFESPAN", "GESTTIME"))
+dfParadox %>% dplyr::select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), aes(colour=DANG_IND), legend=1,
+          columns=c("BODY_WEI", "BRAIN_WE", "PARADOX", "LIFESPAN", "GESTTIME"))
 ```
 
 ```{r, warning=FALSE, message = FALSE}
@@ -59,7 +104,7 @@ library(reshape)
 ```
 
 ```{r, warning=FALSE, message = FALSE}
-dplyr::select(df, -NAME) %>%
+dplyr::select(dfSleep, -NAME) %>%
 mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
 cor(method = "pearson") %>%
 melt() %>%
@@ -67,9 +112,9 @@ ggplot(aes(X1, X2)) +
   geom_raster(aes(fill = value)) +
   geom_text(aes(label = round(value, 3))) +
   scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
-  ggtitle("pearson")
+  ggtitle("dfSleep pearson")
 
-dplyr::select(df, -NAME) %>%
+dplyr::select(dfSleep, -NAME) %>%
 mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
 cor(method = "spearman") %>%
 melt() %>%
@@ -77,32 +122,77 @@ ggplot(aes(X1, X2)) +
   geom_raster(aes(fill = value)) +
   geom_text(aes(label = round(value, 3))) +
   scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
-  ggtitle("spearman")
+  ggtitle("dfSleep spearman")
 ```
+
+```{r, warning=FALSE, message = FALSE}
+dplyr::select(dfSlowwave, -NAME) %>%
+mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
+cor(method = "pearson") %>%
+melt() %>%
+ggplot(aes(X1, X2)) +
+  geom_raster(aes(fill = value)) +
+  geom_text(aes(label = round(value, 3))) +
+  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
+  ggtitle("dfSlowwave pearson")
+
+dplyr::select(dfSlowwave, -NAME) %>%
+mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
+cor(method = "spearman") %>%
+melt() %>%
+ggplot(aes(X1, X2)) +
+  geom_raster(aes(fill = value)) +
+  geom_text(aes(label = round(value, 3))) +
+  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
+  ggtitle("dfSlowwave spearman")
+```
+
+```{r, warning=FALSE, message = FALSE}
+dplyr::select(dfParadox, -NAME) %>%
+mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
+cor(method = "pearson") %>%
+melt() %>%
+ggplot(aes(X1, X2)) +
+  geom_raster(aes(fill = value)) +
+  geom_text(aes(label = round(value, 3))) +
+  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
+  ggtitle("dfParadox pearson")
+
+dplyr::select(dfParadox, -NAME) %>%
+mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
+cor(method = "spearman") %>%
+melt() %>%
+ggplot(aes(X1, X2)) +
+  geom_raster(aes(fill = value)) +
+  geom_text(aes(label = round(value, 3))) +
+  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
+  ggtitle("dfParadox spearman")
+```
+
 Посмотрим на частную корреляцию веса животного и сна за вычетом идексов опасности.
 ```{r, warning=FALSE, message = FALSE}
 library(ppcor)
 ```
 
 ```{r, warning=FALSE, message = FALSE}
-((dplyr::select(df, -NAME, -BRAIN_WE, -LIFESPAN, -GESTTIME) %>%
+((dplyr::select(dfSleep, -NAME, -BRAIN_WE, -LIFESPAN, -GESTTIME) %>%
 mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
 pcor(method = "spearman"))$estimate %>%
 as.data.frame())["SLEEP", "BODY_WEI"]
 ```
 Посмотрим на частную корреляцию индексов опасности животного и сна за вычетом веса.
 ```{r, warning=FALSE, message = FALSE}
-((dplyr::select(df, -NAME, -EXP_IND, -DANG_IND) %>%
+((dplyr::select(dfSleep, -NAME, -EXP_IND, -DANG_IND) %>%
 mutate(PRED_IND = as.numeric(PRED_IND)) %>%
 pcor(method = "spearman"))$estimate %>% 
 as.data.frame())["SLEEP", "PRED_IND"]
 
-((dplyr::select(df, -NAME, -PRED_IND, -DANG_IND) %>%
+((dplyr::select(dfSleep, -NAME, -PRED_IND, -DANG_IND) %>%
 mutate(EXP_IND = as.numeric(EXP_IND)) %>%
 pcor(method = "spearman"))$estimate %>% 
 as.data.frame())["SLEEP", "EXP_IND"]
 
-((dplyr::select(df, -NAME, -EXP_IND, -PRED_IND) %>%
+((dplyr::select(dfSleep, -NAME, -EXP_IND, -PRED_IND) %>%
 mutate(DANG_IND = as.numeric(DANG_IND)) %>%
 pcor(method = "spearman"))$estimate %>% 
 as.data.frame())["SLEEP", "DANG_IND"]
