@@ -4,10 +4,8 @@ output: html_document
 date: "2022-11-11"
 ---
 
-# 1. Прочитаем и обработаем данные.
-Уберем разделение сна на две стадии, так как много пропусков, удалим всех индивидов 
-с NA. Переведем вес животного в граммы и логорифмируем вес животного и вес мозга, чтобы 
-слоны так сильно не выделялись на фоне остальных животных, и факторизуем индексы.
+Прочитаем и обработаем данные. Среди данных не может быть отрицательных значений, 
+NA обозначаются как -999.
 ```{r, message=FALSE, warning=FALSE}
 library(readxl)
 library(dplyr)
@@ -18,229 +16,89 @@ library(tidyr)
 df <- read_excel("Sleep/SLEEP_shortname.xls")
 df[df < 0] <- NA
 
-dfSleep <- df %>% dplyr::select(-SLOWWAVE, -PARADOX) %>% 
-  drop_na() %>%
-  mutate(PRED_IND = as.factor(PRED_IND), EXP_IND = as.factor(EXP_IND),
-         DANG_IND = as.factor(DANG_IND), 
-         BODY_WEI = log(BODY_WEI * 1000), BRAIN_WE = log(BRAIN_WE), 
-         LIFESPAN = log(LIFESPAN * 365.25), GESTTIME = log(GESTTIME))
-
-dfSlowwave <- df %>% dplyr::select(-SLEEP, -PARADOX) %>% 
-  drop_na() %>%
-  mutate(PRED_IND = as.factor(PRED_IND), EXP_IND = as.factor(EXP_IND),
-         DANG_IND = as.factor(DANG_IND), 
-         BODY_WEI = log(BODY_WEI * 1000), BRAIN_WE = log(BRAIN_WE), 
-         LIFESPAN = log(LIFESPAN * 365.25), GESTTIME = log(GESTTIME))
-
-dfParadox <- df %>% dplyr::select(-SLEEP, -SLOWWAVE) %>% 
-  drop_na() %>%
-  mutate(PRED_IND = as.factor(PRED_IND), EXP_IND = as.factor(EXP_IND),
-         DANG_IND = as.factor(DANG_IND), 
-         BODY_WEI = log(BODY_WEI * 1000), BRAIN_WE = log(BRAIN_WE), 
-         LIFESPAN = log(LIFESPAN * 365.25), GESTTIME = log(GESTTIME))
-
-
 head(df)
-length(dfSleep$NAME)
-length(dfSlowwave$NAME)
-length(dfParadox$NAME)
+length(df$NAME)
 ```
-Гипотеза 1. Большому животному необходимо спать больше чем небольшому животному.
-Гипотеза 2. Животные, находящиеся в большей опасности во время, сна спят меньше.
-
-Посмотрим на корреляции в трех датасетах.
+Посмотрим на данные.
 ```{r, message=FALSE, warning=FALSE}
 library(ggplot2)
 library(GGally)
 ```
 
 ```{r, message=FALSE, warning=FALSE}
-dfSleep %>% dplyr::select(-NAME) %>%
+df %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), 
           columns = c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
-dfSleep %>% dplyr::select(-NAME) %>%
-  ggpairs(diag=list(continuous = "barDiag"), aes(colour=PRED_IND), legend=1,
-          columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
-dfSleep %>% dplyr::select(-NAME) %>%
-  ggpairs(diag=list(continuous = "barDiag"), aes(colour=EXP_IND), legend=1,
-          columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
-dfSleep %>% dplyr::select(-NAME) %>%
-  ggpairs(diag=list(continuous = "barDiag"), aes(colour=DANG_IND), legend=1,
-          columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
 ```
-
+Преобразуем данные. Переведем вес животного в граммы, продолжительность жизни в
+дни. Логарифмируем данные, чтобы было легче наблюдать корреляции (выше заметны 
+сильно отличающиеся индивиды, это слоны). Факторизуем индексы.
+```{r}
+dfNew <- df %>% mutate(PRED_IND = as.factor(PRED_IND), EXP_IND = as.factor(EXP_IND),
+                   DANG_IND = as.factor(DANG_IND), 
+                   BODY_WEI = log(BODY_WEI * 1000), BRAIN_WE = log(BRAIN_WE), 
+                   LIFESPAN = log(LIFESPAN * 365.25), GESTTIME = log(GESTTIME))
+```
+Посмотрим на новые данные. Сгруппируем индивидов по факторам. 
 ```{r, message=FALSE, warning=FALSE}
-dfSlowwave %>% dplyr::select(-NAME) %>%
+dfNew %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), 
-          columns = c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "LIFESPAN", "GESTTIME"))
-dfSlowwave %>% dplyr::select(-NAME) %>%
+          columns = c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
+dfNew %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), aes(colour=PRED_IND), legend=1,
-          columns=c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "LIFESPAN", "GESTTIME"))
-dfSlowwave %>% dplyr::select(-NAME) %>%
+          columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
+dfNew %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), aes(colour=EXP_IND), legend=1,
-          columns=c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "LIFESPAN", "GESTTIME"))
-dfSlowwave %>% dplyr::select(-NAME) %>%
+          columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
+dfNew %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), aes(colour=DANG_IND), legend=1,
-          columns=c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "LIFESPAN", "GESTTIME"))
+          columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
 ```
-
-```{r, message=FALSE, warning=FALSE}
-dfParadox %>% dplyr::select(-NAME) %>%
-  ggpairs(diag=list(continuous = "barDiag"), 
-          columns = c("BODY_WEI", "BRAIN_WE", "PARADOX", "LIFESPAN", "GESTTIME"))
-dfParadox %>% dplyr::select(-NAME) %>%
-  ggpairs(diag=list(continuous = "barDiag"), aes(colour=PRED_IND), legend=1,
-          columns=c("BODY_WEI", "BRAIN_WE", "PARADOX", "LIFESPAN", "GESTTIME"))
-dfParadox %>% dplyr::select(-NAME) %>%
-  ggpairs(diag=list(continuous = "barDiag"), aes(colour=EXP_IND), legend=1,
-          columns=c("BODY_WEI", "BRAIN_WE", "PARADOX", "LIFESPAN", "GESTTIME"))
-dfParadox %>% dplyr::select(-NAME) %>%
-  ggpairs(diag=list(continuous = "barDiag"), aes(colour=DANG_IND), legend=1,
-          columns=c("BODY_WEI", "BRAIN_WE", "PARADOX", "LIFESPAN", "GESTTIME"))
-```
-
+Посмотрим на корреляции между признаками.
 ```{r, warning=FALSE, message = FALSE}
 library(reshape)
 ```
 
 ```{r, warning=FALSE, message = FALSE}
-dplyr::select(dfSleep, -NAME) %>%
+dplyr::select(dfNew, -NAME) %>%
 mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
-cor(method = "pearson") %>%
+cor(method = "pearson", use = "pairwise.complete.obs") %>%
 melt() %>%
 ggplot(aes(X1, X2)) +
   geom_raster(aes(fill = value)) +
   geom_text(aes(label = round(value, 3))) +
   scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
-  ggtitle("dfSleep pearson")
+  ggtitle("dfNew pearson") +
+  theme(axis.text.x = element_text(angle = 50, hjust = 1))
 
-dplyr::select(dfSleep, -NAME) %>%
+dplyr::select(dfNew, -NAME) %>%
 mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
-cor(method = "spearman") %>%
+cor(method = "spearman", use = "pairwise.complete.obs") %>%
 melt() %>%
 ggplot(aes(X1, X2)) +
   geom_raster(aes(fill = value)) +
   geom_text(aes(label = round(value, 3))) +
   scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
-  ggtitle("dfSleep spearman")
+  ggtitle("dfNew spearman") +
+  theme(axis.text.x = element_text(angle = 50, hjust = 1))
+  
 ```
-
+Опишем разницу между животными по степени опасности места, где
+они спят.
 ```{r, warning=FALSE, message = FALSE}
-dplyr::select(dfSlowwave, -NAME) %>%
-mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
-cor(method = "pearson") %>%
-melt() %>%
-ggplot(aes(X1, X2)) +
-  geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 3))) +
-  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
-  ggtitle("dfSlowwave pearson")
-
-dplyr::select(dfSlowwave, -NAME) %>%
-mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
-cor(method = "spearman") %>%
-melt() %>%
-ggplot(aes(X1, X2)) +
-  geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 3))) +
-  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
-  ggtitle("dfSlowwave spearman")
+dfNew %>% ggplot(aes(y=BODY_WEI, colour=EXP_IND)) + geom_boxplot()
+dfNew %>% ggplot(aes(y=BRAIN_WE, colour=EXP_IND)) + geom_boxplot()
+dfNew %>% ggplot(aes(y=SLOWWAVE, colour=EXP_IND)) + geom_boxplot()
+dfNew %>% ggplot(aes(y=PARADOX, colour=EXP_IND)) + geom_boxplot()
+dfNew %>% ggplot(aes(y=SLEEP, colour=EXP_IND)) + geom_boxplot()
+dfNew %>% ggplot(aes(y=LIFESPAN, colour=EXP_IND)) + geom_boxplot()
+dfNew %>% ggplot(aes(y=GESTTIME, colour=EXP_IND)) + geom_boxplot()
 ```
-
-```{r, warning=FALSE, message = FALSE}
-dplyr::select(dfParadox, -NAME) %>%
-mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
-cor(method = "pearson") %>%
-melt() %>%
-ggplot(aes(X1, X2)) +
-  geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 3))) +
-  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
-  ggtitle("dfParadox pearson")
-
-dplyr::select(dfParadox, -NAME) %>%
-mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
-cor(method = "spearman") %>%
-melt() %>%
-ggplot(aes(X1, X2)) +
-  geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 3))) +
-  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
-  ggtitle("dfParadox spearman")
-```
-
-Посмотрим на частную корреляцию веса животного и сна за вычетом идексов опасности.
-```{r, warning=FALSE, message = FALSE}
-library(ppcor)
-```
-
-```{r, warning=FALSE, message = FALSE}
-((dplyr::select(dfSleep, -NAME, -BRAIN_WE, -LIFESPAN, -GESTTIME) %>%
-mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
-pcor(method = "spearman"))$estimate %>%
-as.data.frame())["SLEEP", "BODY_WEI"]
-
-((dplyr::select(dfSlowwave, -NAME, -BRAIN_WE, -LIFESPAN, -GESTTIME) %>%
-mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
-pcor(method = "spearman"))$estimate %>%
-as.data.frame())["SLOWWAVE", "BODY_WEI"]
-
-((dplyr::select(dfParadox, -NAME, -BRAIN_WE, -LIFESPAN, -GESTTIME) %>%
-mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
-pcor(method = "spearman"))$estimate %>%
-as.data.frame())["PARADOX", "BODY_WEI"]
-```
-Посмотрим на частную корреляцию индексов опасности животного и сна за вычетом веса.
-```{r, warning=FALSE, message = FALSE}
-((dplyr::select(dfSleep, -NAME, -EXP_IND, -DANG_IND) %>%
-mutate(PRED_IND = as.numeric(PRED_IND)) %>%
-pcor(method = "spearman"))$estimate %>% 
-as.data.frame())["SLEEP", "PRED_IND"]
-
-((dplyr::select(dfSleep, -NAME, -PRED_IND, -DANG_IND) %>%
-mutate(EXP_IND = as.numeric(EXP_IND)) %>%
-pcor(method = "spearman"))$estimate %>% 
-as.data.frame())["SLEEP", "EXP_IND"]
-
-((dplyr::select(dfSleep, -NAME, -EXP_IND, -PRED_IND) %>%
-mutate(DANG_IND = as.numeric(DANG_IND)) %>%
-pcor(method = "spearman"))$estimate %>% 
-as.data.frame())["SLEEP", "DANG_IND"]
-```
-
-```{r, warning=FALSE, message = FALSE}
-((dplyr::select(dfSlowwave, -NAME, -EXP_IND, -DANG_IND) %>%
-mutate(PRED_IND = as.numeric(PRED_IND)) %>%
-pcor(method = "spearman"))$estimate %>% 
-as.data.frame())["SLOWWAVE", "PRED_IND"]
-
-((dplyr::select(dfSlowwave, -NAME, -PRED_IND, -DANG_IND) %>%
-mutate(EXP_IND = as.numeric(EXP_IND)) %>%
-pcor(method = "spearman"))$estimate %>% 
-as.data.frame())["SLOWWAVE", "EXP_IND"]
-
-((dplyr::select(dfSlowwave, -NAME, -EXP_IND, -PRED_IND) %>%
-mutate(DANG_IND = as.numeric(DANG_IND)) %>%
-pcor(method = "spearman"))$estimate %>% 
-as.data.frame())["SLOWWAVE", "DANG_IND"]
-```
-
-```{r, warning=FALSE, message = FALSE}
-((dplyr::select(dfParadox, -NAME, -EXP_IND, -DANG_IND) %>%
-mutate(PRED_IND = as.numeric(PRED_IND)) %>%
-pcor(method = "spearman"))$estimate %>% 
-as.data.frame())["PARADOX", "PRED_IND"]
-
-((dplyr::select(dfParadox, -NAME, -PRED_IND, -DANG_IND) %>%
-mutate(EXP_IND = as.numeric(EXP_IND)) %>%
-pcor(method = "spearman"))$estimate %>% 
-as.data.frame())["PARADOX", "EXP_IND"]
-
-((dplyr::select(dfParadox, -NAME, -EXP_IND, -PRED_IND) %>%
-mutate(DANG_IND = as.numeric(DANG_IND)) %>%
-pcor(method = "spearman"))$estimate %>% 
-as.data.frame())["PARADOX", "DANG_IND"]
-```
+Можно заметить, что животные живущие в более защищенных местах имеют меньший
+вес тела и мозга, дольше спят в общем и в разных фазах сна по отдельности, имеют
+менее длительные продолжительность жизни и период вынашивания потомства. 
+Проверим это с помощью критериев, но для этого сначала поймем, какое распределение
+имеют признаки.
 
 
 
