@@ -94,11 +94,76 @@ dfNew %>% ggplot(aes(y=SLEEP, colour=EXP_IND)) + geom_boxplot()
 dfNew %>% ggplot(aes(y=LIFESPAN, colour=EXP_IND)) + geom_boxplot()
 dfNew %>% ggplot(aes(y=GESTTIME, colour=EXP_IND)) + geom_boxplot()
 ```
-Можно заметить, что животные живущие в более защищенных местах имеют меньший
+Можно заметить, что 1) животные живущие в более защищенных местах имеют меньший
 вес тела и мозга, дольше спят в общем и в разных фазах сна по отдельности, имеют
 менее длительные продолжительность жизни и период вынашивания потомства. 
-Проверим это с помощью критериев, но для этого сначала поймем, какое распределение
-имеют признаки.
+Проверим это с помощью критериев.
 
+Используем Welch-test, так как выборки независимые и нам не известны дисперсии.
+```{r}
+dfNew1 <- dplyr::filter(dfNew, EXP_IND == 1)
+dfNew2 <- dplyr::filter(dfNew, EXP_IND == 2)
+dfNew3 <- dplyr::filter(dfNew, EXP_IND == 3)
+dfNew4 <- dplyr::filter(dfNew, EXP_IND == 4)
+dfNew5 <- dplyr::filter(dfNew, EXP_IND == 5)
+```
+
+```{r}
+t.test(dfNew1$BODY_WEI, dfNew2$BODY_WEI, alternative="less")
+t.test(dfNew1$BODY_WEI, dfNew3$BODY_WEI, alternative="less")
+t.test(dfNew1$BODY_WEI, dfNew4$BODY_WEI, alternative="less")
+t.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI, alternative="less")
+
+t.test(dfNew2$BODY_WEI, dfNew3$BODY_WEI, alternative="less")
+t.test(dfNew2$BODY_WEI, dfNew4$BODY_WEI, alternative="less")
+t.test(dfNew2$BODY_WEI, dfNew5$BODY_WEI, alternative="less")
+
+t.test(dfNew3$BODY_WEI, dfNew4$BODY_WEI, alternative="less")
+t.test(dfNew3$BODY_WEI, dfNew5$BODY_WEI, alternative="less")
+
+t.test(dfNew4$BODY_WEI, dfNew5$BODY_WEI, alternative="less")
+```
+Потчти все гипотезы о равенстве мат. ожидание отверглись в пользу того, что
+животное, которое спит в более защищенном месте весит меньше, с уровнем 
+значимости 0.05.
+```{r}
+t.test(dfNew1$BRAIN_WE, dfNew2$BRAIN_WE, alternative="less")
+t.test(dfNew1$BRAIN_WE, dfNew3$BRAIN_WE, alternative="less")
+t.test(dfNew1$BRAIN_WE, dfNew4$BRAIN_WE, alternative="less")
+t.test(dfNew1$BRAIN_WE, dfNew5$BRAIN_WE, alternative="less")
+
+t.test(dfNew2$BRAIN_WE, dfNew3$BRAIN_WE, alternative="less")
+t.test(dfNew2$BRAIN_WE, dfNew4$BRAIN_WE, alternative="less")
+t.test(dfNew2$BRAIN_WE, dfNew5$BRAIN_WE, alternative="less")
+
+t.test(dfNew3$BRAIN_WE, dfNew4$BRAIN_WE, alternative="less")
+t.test(dfNew3$BRAIN_WE, dfNew5$BRAIN_WE, alternative="less")
+
+t.test(dfNew4$BRAIN_WE, dfNew5$BRAIN_WE, alternative="less")
+```
+Потчти все гипотезы о равенстве мат. ожидание отверглись в пользу того, что
+животное, которое спит в более защищенном месте имеет меньший вес мозга, с уровнем 
+значимости 0.05, не учитывая животных, близких друг другу по значению EXP_IND.
+
+
+
+```{r, warning=FALSE, message = FALSE}
+
+dfMelt <- dfNew %>% 
+  select(-PRED_IND, -EXP_IND, - DANG_IND) %>% 
+  as.data.frame(dfNew) %>% 
+  melt(id.vars = "NAME")
+
+ggplot(dfMelt, aes(x = value)) +
+        geom_histogram(aes(y = ..density..)) +
+        facet_wrap(~variable, scales = "free") +
+        labs(x = "", y = "") +
+        geom_line(aes(y = dnorm(value,
+                  mean = tapply(value, variable, mean, na.rm = TRUE)[PANEL],
+                  sd = tapply(value, variable, sd, na.rm = TRUE)[PANEL]
+              )), linetype = 1)
+```
+Кажется, что нормальность данных имеет место, потому будем предполагать наличие 
+нормальности при использовании критериев.
 
 
