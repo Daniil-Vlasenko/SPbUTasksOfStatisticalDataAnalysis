@@ -94,9 +94,9 @@ dfNew %>% ggplot(aes(y=SLEEP, colour=EXP_IND)) + geom_boxplot()
 dfNew %>% ggplot(aes(y=LIFESPAN, colour=EXP_IND)) + geom_boxplot()
 dfNew %>% ggplot(aes(y=GESTTIME, colour=EXP_IND)) + geom_boxplot()
 ```
-Можно заметить, что 1) животные живущие в более защищенных местах имеют меньший
-вес тела и мозга, дольше спят в общем и в разных фазах сна по отдельности, имеют
-менее длительные продолжительность жизни и период вынашивания потомства. 
+Можно заметить, что животные живущие в более защищенных местах 1,2) имеют меньший
+вес тела и мозга; 3,4,5) дольше спят в общем и в разных фазах сна по отдельности;
+6,7) имеют менее длительные продолжительность жизни и период вынашивания потомства. 
 Проверим это с помощью критериев.
 
 Используем Welch-test, так как выборки независимые и нам не известны дисперсии.
@@ -141,9 +141,96 @@ t.test(dfNew3$BRAIN_WE, dfNew5$BRAIN_WE, alternative="less")
 
 t.test(dfNew4$BRAIN_WE, dfNew5$BRAIN_WE, alternative="less")
 ```
-Потчти все гипотезы о равенстве мат. ожидание отверглись в пользу того, что
-животное, которое спит в более защищенном месте имеет меньший вес мозга, с уровнем 
-значимости 0.05, не учитывая животных, близких друг другу по значению EXP_IND.
+Если не учитывать животных, близких друг другу по значению EXP_IND, то потчти 
+все гипотезы о равенстве мат. ожидание отверглись в пользу того, что животное, 
+которое спит в более защищенном месте имеет меньший вес мозга, с уровнем 
+значимости 0.05.
+```{r}
+t.test(dfNew1$SLOWWAVE, dfNew2$SLOWWAVE, alternative="greater")
+t.test(dfNew1$SLOWWAVE, dfNew3$SLOWWAVE, alternative="greater")
+t.test(dfNew1$SLOWWAVE, dfNew4$SLOWWAVE, alternative="greater")
+t.test(dfNew1$SLOWWAVE, dfNew5$SLOWWAVE, alternative="greater")
+
+t.test(dfNew2$SLOWWAVE, dfNew3$SLOWWAVE, alternative="greater")
+t.test(dfNew2$SLOWWAVE, dfNew4$SLOWWAVE, alternative="greater")
+t.test(dfNew2$SLOWWAVE, dfNew5$SLOWWAVE, alternative="greater")
+
+t.test(dfNew3$SLOWWAVE, dfNew4$SLOWWAVE, alternative="greater")
+t.test(dfNew3$SLOWWAVE, dfNew5$SLOWWAVE, alternative="greater")
+
+t.test(dfNew4$SLOWWAVE, dfNew5$SLOWWAVE, alternative="greater")
+```
+Тесты подтверждают результаты, наблюдаемые на box-plot-ах. 
+```{r}
+t.test(dfNew1$PARADOX, dfNew2$PARADOX, alternative="greater")
+t.test(dfNew1$PARADOX, dfNew3$PARADOX, alternative="greater")
+t.test(dfNew1$PARADOX, dfNew4$PARADOX, alternative="greater")
+t.test(dfNew1$PARADOX, dfNew5$PARADOX, alternative="greater")
+
+t.test(dfNew2$PARADOX, dfNew3$PARADOX, alternative="greater")
+t.test(dfNew2$PARADOX, dfNew4$PARADOX, alternative="greater")
+t.test(dfNew2$PARADOX, dfNew5$PARADOX, alternative="greater")
+
+t.test(dfNew3$PARADOX, dfNew4$PARADOX, alternative="greater")
+t.test(dfNew3$PARADOX, dfNew5$PARADOX, alternative="greater")
+
+t.test(dfNew4$PARADOX, dfNew5$PARADOX, alternative="greater")
+```
+Тесты подтверждают результаты, наблюдаемые на box-plot-ах. 
+```{r}
+t.test(dfNew1$SLEEP, dfNew2$SLEEP, alternative="greater")
+t.test(dfNew1$SLEEP, dfNew3$SLEEP, alternative="greater")
+t.test(dfNew1$SLEEP, dfNew4$SLEEP, alternative="greater")
+t.test(dfNew1$SLEEP, dfNew5$SLEEP, alternative="greater")
+
+t.test(dfNew2$SLEEP, dfNew3$SLEEP, alternative="greater")
+t.test(dfNew2$SLEEP, dfNew4$SLEEP, alternative="greater")
+t.test(dfNew2$SLEEP, dfNew5$SLEEP, alternative="greater")
+
+t.test(dfNew3$SLEEP, dfNew4$SLEEP, alternative="greater")
+t.test(dfNew3$SLEEP, dfNew5$SLEEP, alternative="greater")
+
+t.test(dfNew4$SLEEP, dfNew5$SLEEP, alternative="greater")
+```
+Тесты подтверждают результаты, наблюдаемые на box-plot-ах. 
+```{r}
+t.test(dfNew1$LIFESPAN, dfNew2$LIFESPAN, alternative="less")
+t.test(dfNew1$LIFESPAN, dfNew3$LIFESPAN, alternative="less")
+t.test(dfNew1$LIFESPAN, dfNew4$LIFESPAN, alternative="less")
+t.test(dfNew1$LIFESPAN, dfNew5$LIFESPAN, alternative="less")
+
+t.test(dfNew2$LIFESPAN, dfNew3$LIFESPAN, alternative="less")
+t.test(dfNew2$LIFESPAN, dfNew4$LIFESPAN, alternative="less")
+t.test(dfNew2$LIFESPAN, dfNew5$LIFESPAN, alternative="less")
+
+t.test(dfNew3$LIFESPAN, dfNew4$LIFESPAN, alternative="less")
+t.test(dfNew3$LIFESPAN, dfNew5$LIFESPAN, alternative="less")
+
+t.test(dfNew4$LIFESPAN, dfNew5$LIFESPAN, alternative="less")
+```
+Тесты подтверждают результаты, наблюдаемые на box-plot-ах. 
+```{r}
+t.test(dfNew1$GESTTIME, dfNew2$GESTTIME, alternative="less")
+t.test(dfNew1$GESTTIME, dfNew3$GESTTIME, alternative="less")
+t.test(dfNew1$GESTTIME, dfNew4$GESTTIME, alternative="less")
+t.test(dfNew1$GESTTIME, dfNew5$GESTTIME, alternative="less")
+
+t.test(dfNew2$GESTTIME, dfNew3$GESTTIME, alternative="less")
+t.test(dfNew2$GESTTIME, dfNew4$GESTTIME, alternative="less")
+t.test(dfNew2$GESTTIME, dfNew5$GESTTIME, alternative="less")
+
+t.test(dfNew3$GESTTIME, dfNew4$GESTTIME, alternative="less")
+t.test(dfNew3$GESTTIME, dfNew5$GESTTIME, alternative="less")
+
+t.test(dfNew4$GESTTIME, dfNew5$GESTTIME, alternative="less")
+```
+Тесты подтверждают результаты, наблюдаемые на box-plot-ах. 
+
+
+
+
+
+
 
 
 
