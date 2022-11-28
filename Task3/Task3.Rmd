@@ -273,17 +273,92 @@ ks.test(dfNew$GESTTIME, "pnorm", mean = mean(dfNew$GESTTIME, na.rm=TRUE), sd = s
 Все тесты не отрецают, что признаки имеют нормальное распределение с уровнем 
 значимости 0.5.
 
+В качестве описания зависимостей между критериями выше представленны ggpairs и
+correlation matrix plot. Также посчитаем интересные частные корреляции.
+```{r, warning=FALSE, message = FALSE}
+library(ppcor)
+```
+Посмотрим на частную корреляцию веса животного и сна за вычетом идексов опасности.
+```{r, warning=FALSE, message = FALSE}
+((dplyr::select(dfNew, -NAME, -BRAIN_WE, -LIFESPAN, -GESTTIME, -SLOWWAVE, -PARADOX) %>%
+  mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
+  drop_na() %>%
+  pcor(method = "spearman"))$estimate %>%
+as.data.frame())["SLEEP", "BODY_WEI"]
 
+((dplyr::select(dfNew, -NAME, -BRAIN_WE, -LIFESPAN, -GESTTIME, -SLEEP, -PARADOX) %>%
+  mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
+  drop_na() %>%
+  pcor(method = "spearman"))$estimate %>%
+as.data.frame())["SLOWWAVE", "BODY_WEI"]
 
+((dplyr::select(dfNew, -NAME, -BRAIN_WE, -LIFESPAN, -GESTTIME, -SLOWWAVE, -SLEEP) %>%
+  mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
+  drop_na() %>%
+  pcor(method = "spearman"))$estimate %>%
+as.data.frame())["PARADOX", "BODY_WEI"]
+```
+Посмотрим на частые корреляции индексов опасности животного и сна за вычетом 
+веса и связанных с ним критериев.
+```{r, warning=FALSE, message = FALSE}
+((dplyr::select(dfNew, -NAME, -EXP_IND, -DANG_IND, -SLOWWAVE, -PARADOX) %>%
+  mutate(PRED_IND = as.numeric(PRED_IND)) %>%
+  drop_na() %>%
+  pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["SLEEP", "PRED_IND"]
 
+((dplyr::select(dfNew, -NAME, -EXP_IND, -DANG_IND, -SLEEP, -PARADOX) %>%
+  mutate(PRED_IND = as.numeric(PRED_IND)) %>%
+  drop_na() %>%
+  pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["SLOWWAVE", "PRED_IND"]
 
+((dplyr::select(dfNew, -NAME, -EXP_IND, -DANG_IND, -SLOWWAVE, -SLEEP) %>%
+  mutate(PRED_IND = as.numeric(PRED_IND)) %>%
+  drop_na() %>%
+  pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["PARADOX", "PRED_IND"]
+```
 
+```{r, warning=FALSE, message = FALSE}
+((dplyr::select(dfNew, -NAME, -PRED_IND, -DANG_IND, -SLOWWAVE, -PARADOX) %>%
+  mutate(EXP_IND = as.numeric(EXP_IND)) %>%
+  drop_na() %>%
+  pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["SLEEP", "EXP_IND"]
 
+((dplyr::select(dfNew, -NAME, -PRED_IND, -DANG_IND, -SLEEP, -PARADOX) %>%
+  mutate(EXP_IND = as.numeric(EXP_IND)) %>%
+  drop_na() %>%
+  pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["SLOWWAVE", "EXP_IND"]
 
+((dplyr::select(dfNew, -NAME, -PRED_IND, -DANG_IND, -SLOWWAVE, -SLEEP) %>%
+  mutate(EXP_IND = as.numeric(EXP_IND)) %>%
+  drop_na() %>%
+  pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["PARADOX", "EXP_IND"]
+```
 
+```{r, warning=FALSE, message = FALSE}
+((dplyr::select(dfNew, -NAME, -PRED_IND, -EXP_IND, -SLOWWAVE, -PARADOX) %>%
+  mutate(DANG_IND = as.numeric(DANG_IND)) %>%
+  drop_na() %>%
+  pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["SLEEP", "DANG_IND"]
 
+((dplyr::select(dfNew, -NAME, -PRED_IND, -EXP_IND, -SLEEP, -PARADOX) %>%
+  mutate(DANG_IND = as.numeric(DANG_IND)) %>%
+  drop_na() %>%
+  pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["SLOWWAVE", "DANG_IND"]
 
-
+((dplyr::select(dfNew, -NAME, -PRED_IND, -EXP_IND, -SLOWWAVE, -SLEEP) %>%
+  mutate(DANG_IND = as.numeric(DANG_IND)) %>%
+  drop_na() %>%
+  pcor(method = "spearman"))$estimate %>% 
+as.data.frame())["PARADOX", "DANG_IND"]
+```
 
 
 
