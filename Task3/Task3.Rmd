@@ -226,14 +226,8 @@ t.test(dfNew4$GESTTIME, dfNew5$GESTTIME, alternative="less")
 ```
 Тесты подтверждают результаты, наблюдаемые на box-plot-ах. 
 
-
-
-
-
-
-
-
-
+Опишем распределения признаков.
+Изобразим гистограммы признаков на фоне плотности нормального распределения.
 ```{r, warning=FALSE, message = FALSE}
 
 dfMelt <- dfNew %>% 
@@ -246,11 +240,51 @@ ggplot(dfMelt, aes(x = value)) +
         facet_wrap(~variable, scales = "free") +
         labs(x = "", y = "") +
         geom_line(aes(y = dnorm(value,
-                  mean = tapply(value, variable, mean, na.rm = TRUE)[PANEL],
-                  sd = tapply(value, variable, sd, na.rm = TRUE)[PANEL]
-              )), linetype = 1)
+                      mean = tapply(value, variable, mean, na.rm = TRUE)[PANEL],
+                      sd = tapply(value, variable, sd, na.rm = TRUE)[PANEL]
+                      )), linetype = 1)
 ```
-Кажется, что нормальность данных имеет место, потому будем предполагать наличие 
-нормальности при использовании критериев.
+Изобразим выборочную функцию распредления признаков на фоне функции 
+распределения нормального распределения.
+```{r, warning=FALSE, message = FALSE}
+ggplot(dfMelt, aes(x = value)) +
+        stat_ecdf() +
+        facet_wrap(~variable, scales = "free") +
+        labs(x = "", y = "") +
+        geom_line(aes(y = pnorm(value,
+                      mean = tapply(value, variable, mean, na.rm = TRUE)[PANEL],
+                      sd = tapply(value, variable, sd, na.rm = TRUE)[PANEL]
+                      )), linetype = 1)
+```
+Можно заметить, что имеет место нормальность распределения признаков. Проверим
+это с помощью признаков.
+
+Используем критерий Колмогорова-Смирнова, так как распределения абсолютно 
+непрерывны.
+```{r}
+ks.test(dfNew$BODY_WEI, "pnorm", mean = mean(dfNew$BODY_WEI, na.rm=TRUE), sd = sd(dfNew$BODY_WEI, na.rm=TRUE))
+ks.test(dfNew$BRAIN_WE, "pnorm", mean = mean(dfNew$BRAIN_WE, na.rm=TRUE), sd = sd(dfNew$BRAIN_WE, na.rm=TRUE))
+ks.test(dfNew$SLOWWAVE, "pnorm", mean = mean(dfNew$SLOWWAVE, na.rm=TRUE), sd = sd(dfNew$SLOWWAVE, na.rm=TRUE))
+ks.test(dfNew$PARADOX, "pnorm", mean = mean(dfNew$PARADOX, na.rm=TRUE), sd = sd(dfNew$PARADOX, na.rm=TRUE))
+ks.test(dfNew$SLEEP, "pnorm", mean = mean(dfNew$SLEEP, na.rm=TRUE), sd = sd(dfNew$SLEEP, na.rm=TRUE))
+ks.test(dfNew$LIFESPAN, "pnorm", mean = mean(dfNew$LIFESPAN, na.rm=TRUE), sd = sd(dfNew$LIFESPAN, na.rm=TRUE))
+ks.test(dfNew$GESTTIME, "pnorm", mean = mean(dfNew$GESTTIME, na.rm=TRUE), sd = sd(dfNew$GESTTIME, na.rm=TRUE))
+```
+Все тесты не отрецают, что признаки имеют нормальное распределение с уровнем 
+значимости 0.5.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
