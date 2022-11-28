@@ -61,6 +61,7 @@ dfNew %>% dplyr::select(-NAME) %>%
 и новой выборках.
 ```{r}
 library(moments)
+library(entropy)
 ```
 
 Вес тела.
@@ -150,8 +151,21 @@ var(dfNew$GESTTIME, na.rm = TRUE)
 skewness(dfNew$GESTTIME, na.rm = TRUE)
 kurtosis(dfNew$GESTTIME, na.rm = TRUE)
 ```
-
-
+Идекс, отражающий опасность стать добычей.
+```{r}
+quantile(df$PRED_IND, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+entropy.empirical(df$PRED_IND, unit="log2")
+```
+Идекс, отражающий безопасность места, где спит животное.
+```{r}
+quantile(df$EXP_IND, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+entropy.empirical(df$EXP_IND, unit="log2")
+```
+Идекс, отражающий опасность, в которой находиться животное.
+```{r}
+quantile(df$DANG_IND, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+entropy.empirical(df$DANG_IND, unit="log2")
+```
 ## Дальше смотреть не надо.
 Посмотрим на корреляции между признаками.
 ```{r, warning=FALSE, message = FALSE}
