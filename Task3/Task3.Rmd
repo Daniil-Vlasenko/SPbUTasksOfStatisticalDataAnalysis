@@ -169,10 +169,77 @@ entropy.empirical(df$DANG_IND, unit="log2")
 ## О виде распределений и о сравнении распределений.
 ### Индивидуальное задание 2.
 Опишем распределения признаков.
+```{r, warning=FALSE, message = FALSE}
+library(reshape)
+```
+Изобразим гистограммы признаков на фоне плотности нормального распределения.
+```{r, warning=FALSE, message = FALSE}
+dfMelt <- dfNew %>% 
+  dplyr::select(-PRED_IND, -EXP_IND, -DANG_IND) %>% 
+  as.data.frame(dfNew) %>% 
+  melt(id.vars = "NAME")
+
+ggplot(dfMelt, aes(x = value)) +
+        geom_histogram(aes(y = ..density..)) +
+        facet_wrap(~variable, scales = "free") +
+        labs(x = "", y = "") +
+        geom_line(aes(y = dnorm(value,
+                      mean = tapply(value, variable, mean, na.rm = TRUE)[PANEL],
+                      sd = tapply(value, variable, sd, na.rm = TRUE)[PANEL]
+                      )), color = "blue")
+```
+Изобразим выборочную функцию распредления признаков на фоне функции 
+распределения нормального распределения.
+```{r, warning=FALSE, message = FALSE}
+ggplot(dfMelt, aes(x = value)) +
+        stat_ecdf() +
+        facet_wrap(~variable, scales = "free") +
+        labs(x = "", y = "") +
+        geom_line(aes(y = pnorm(value,
+                      mean = tapply(value, variable, mean, na.rm = TRUE)[PANEL],
+                      sd = tapply(value, variable, sd, na.rm = TRUE)[PANEL]
+                      )), color = "blue")
+```
+Можно заметить, что имеет место нормальность распределения признаков. Давайте 
+еще нарисуем PP-plot и QQ-plot.
+```{r, warning=FALSE, message = FALSE}
+library(qqplotr) 
+```
+
+```{r, warning=FALSE, message = FALSE}
+ggplot(dfMelt, aes(sample = value)) +
+        stat_pp_point(size = 1) +
+        facet_wrap(~variable, scales = "free") +
+        labs(x = "", y = "") +
+        stat_pp_line(color = "blue")
+```
+```{r, warning=FALSE, message = FALSE}
+ggplot(dfMelt, aes(sample = value)) +
+        stat_qq_point(size = 1) +
+        facet_wrap(~variable, scales = "free") +
+        labs(x = "", y = "") +
+        stat_qq_line(color = "blue")
+```
 
 
+Проверим это с помощью признаков.
+
+Используем критерий Колмогорова-Смирнова, так как распределения абсолютно 
+непрерывны.
+```{r}
+ks.test(dfNew$BODY_WEI, "pnorm", mean = mean(dfNew$BODY_WEI, na.rm=TRUE), sd = sd(dfNew$BODY_WEI, na.rm=TRUE))
+ks.test(dfNew$BRAIN_WE, "pnorm", mean = mean(dfNew$BRAIN_WE, na.rm=TRUE), sd = sd(dfNew$BRAIN_WE, na.rm=TRUE))
+ks.test(dfNew$SLOWWAVE, "pnorm", mean = mean(dfNew$SLOWWAVE, na.rm=TRUE), sd = sd(dfNew$SLOWWAVE, na.rm=TRUE))
+ks.test(dfNew$PARADOX, "pnorm", mean = mean(dfNew$PARADOX, na.rm=TRUE), sd = sd(dfNew$PARADOX, na.rm=TRUE))
+ks.test(dfNew$SLEEP, "pnorm", mean = mean(dfNew$SLEEP, na.rm=TRUE), sd = sd(dfNew$SLEEP, na.rm=TRUE))
+ks.test(dfNew$LIFESPAN, "pnorm", mean = mean(dfNew$LIFESPAN, na.rm=TRUE), sd = sd(dfNew$LIFESPAN, na.rm=TRUE))
+ks.test(dfNew$GESTTIME, "pnorm", mean = mean(dfNew$GESTTIME, na.rm=TRUE), sd = sd(dfNew$GESTTIME, na.rm=TRUE))
+```
+Все тесты не отрицают, что признаки имеют нормальное распределение с уровнем 
+значимости 0.5.
 
 
+--------------------------------------------------------------------
 ### Индивидуальное задание 1. 
 Опишем разницу между животными по степени опасности места, где они спят.
 ```{r, warning=FALSE, message = FALSE}
@@ -325,10 +392,6 @@ t.test(dfNew4$GESTTIME, dfNew5$GESTTIME, alternative="less")
 ## Дальше смотреть не надо.
 Посмотрим на корреляции между признаками.
 ```{r, warning=FALSE, message = FALSE}
-library(reshape)
-```
-
-```{r, warning=FALSE, message = FALSE}
 dplyr::select(dfNew, -NAME) %>%
 mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
 cor(method = "pearson", use = "pairwise.complete.obs") %>%
@@ -351,53 +414,6 @@ ggplot(aes(X1, X2)) +
   ggtitle("dfNew spearman") +
   theme(axis.text.x = element_text(angle = 50, hjust = 1))
 ```
-
-Опишем распределения признаков.
-Изобразим гистограммы признаков на фоне плотности нормального распределения.
-```{r, warning=FALSE, message = FALSE}
-
-dfMelt <- dfNew %>% 
-  select(-PRED_IND, -EXP_IND, - DANG_IND) %>% 
-  as.data.frame(dfNew) %>% 
-  melt(id.vars = "NAME")
-
-ggplot(dfMelt, aes(x = value)) +
-        geom_histogram(aes(y = ..density..)) +
-        facet_wrap(~variable, scales = "free") +
-        labs(x = "", y = "") +
-        geom_line(aes(y = dnorm(value,
-                      mean = tapply(value, variable, mean, na.rm = TRUE)[PANEL],
-                      sd = tapply(value, variable, sd, na.rm = TRUE)[PANEL]
-                      )), linetype = 1)
-```
-Изобразим выборочную функцию распредления признаков на фоне функции 
-распределения нормального распределения.
-```{r, warning=FALSE, message = FALSE}
-ggplot(dfMelt, aes(x = value)) +
-        stat_ecdf() +
-        facet_wrap(~variable, scales = "free") +
-        labs(x = "", y = "") +
-        geom_line(aes(y = pnorm(value,
-                      mean = tapply(value, variable, mean, na.rm = TRUE)[PANEL],
-                      sd = tapply(value, variable, sd, na.rm = TRUE)[PANEL]
-                      )), linetype = 1)
-```
-Можно заметить, что имеет место нормальность распределения признаков. Проверим
-это с помощью признаков.
-
-Используем критерий Колмогорова-Смирнова, так как распределения абсолютно 
-непрерывны.
-```{r}
-ks.test(dfNew$BODY_WEI, "pnorm", mean = mean(dfNew$BODY_WEI, na.rm=TRUE), sd = sd(dfNew$BODY_WEI, na.rm=TRUE))
-ks.test(dfNew$BRAIN_WE, "pnorm", mean = mean(dfNew$BRAIN_WE, na.rm=TRUE), sd = sd(dfNew$BRAIN_WE, na.rm=TRUE))
-ks.test(dfNew$SLOWWAVE, "pnorm", mean = mean(dfNew$SLOWWAVE, na.rm=TRUE), sd = sd(dfNew$SLOWWAVE, na.rm=TRUE))
-ks.test(dfNew$PARADOX, "pnorm", mean = mean(dfNew$PARADOX, na.rm=TRUE), sd = sd(dfNew$PARADOX, na.rm=TRUE))
-ks.test(dfNew$SLEEP, "pnorm", mean = mean(dfNew$SLEEP, na.rm=TRUE), sd = sd(dfNew$SLEEP, na.rm=TRUE))
-ks.test(dfNew$LIFESPAN, "pnorm", mean = mean(dfNew$LIFESPAN, na.rm=TRUE), sd = sd(dfNew$LIFESPAN, na.rm=TRUE))
-ks.test(dfNew$GESTTIME, "pnorm", mean = mean(dfNew$GESTTIME, na.rm=TRUE), sd = sd(dfNew$GESTTIME, na.rm=TRUE))
-```
-Все тесты не отрицают, что признаки имеют нормальное распределение с уровнем 
-значимости 0.5.
 
 В качестве описания зависимостей между критериями выше представленны ggpairs и
 correlation matrix plot. Также посчитаем интересные частные корреляции.
