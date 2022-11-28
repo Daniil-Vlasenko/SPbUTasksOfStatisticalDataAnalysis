@@ -4,7 +4,7 @@ output: html_document
 date: "2022-11-11"
 ---
 
-## Предварительный анализ данных
+## Предварительный анализ данных.
 Прочитаем и обработаем данные. Среди данных не может быть отрицательных значений, 
 NA обозначаются как -999.
 ```{r, message=FALSE, warning=FALSE}
@@ -63,7 +63,6 @@ dfNew %>% dplyr::select(-NAME) %>%
 library(moments)
 library(entropy)
 ```
-
 Вес тела.
 ```{r}
 cat("df:\n")
@@ -166,37 +165,16 @@ entropy.empirical(df$EXP_IND, unit="log2")
 quantile(df$DANG_IND, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
 entropy.empirical(df$DANG_IND, unit="log2")
 ```
-## Дальше смотреть не надо.
-Посмотрим на корреляции между признаками.
-```{r, warning=FALSE, message = FALSE}
-library(reshape)
-```
 
-```{r, warning=FALSE, message = FALSE}
-dplyr::select(dfNew, -NAME) %>%
-mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
-cor(method = "pearson", use = "pairwise.complete.obs") %>%
-melt() %>%
-ggplot(aes(X1, X2)) +
-  geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 3))) +
-  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
-  ggtitle("dfNew pearson") +
-  theme(axis.text.x = element_text(angle = 50, hjust = 1))
+## О виде распределений и о сравнении распределений.
+### Индивидуальное задание 2.
+Опишем распределения признаков.
 
-dplyr::select(dfNew, -NAME) %>%
-mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
-cor(method = "spearman", use = "pairwise.complete.obs") %>%
-melt() %>%
-ggplot(aes(X1, X2)) +
-  geom_raster(aes(fill = value)) +
-  geom_text(aes(label = round(value, 3))) +
-  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
-  ggtitle("dfNew spearman") +
-  theme(axis.text.x = element_text(angle = 50, hjust = 1))
-```
-Опишем разницу между животными по степени опасности места, где
-они спят.
+
+
+
+### Индивидуальное задание 1. 
+Опишем разницу между животными по степени опасности места, где они спят.
 ```{r, warning=FALSE, message = FALSE}
 dfNew %>% ggplot(aes(y=BODY_WEI, colour=EXP_IND)) + geom_boxplot()
 dfNew %>% ggplot(aes(y=BRAIN_WE, colour=EXP_IND)) + geom_boxplot()
@@ -207,7 +185,7 @@ dfNew %>% ggplot(aes(y=LIFESPAN, colour=EXP_IND)) + geom_boxplot()
 dfNew %>% ggplot(aes(y=GESTTIME, colour=EXP_IND)) + geom_boxplot()
 ```
 Можно заметить, что животные живущие в более защищенных местах 1,2) имеют меньший
-вес тела и мозга; 3,4,5) дольше спят в общем и в разных фазах сна по отдельности;
+вес тела и мозга; 3,4,5) чаще дольше спят в общем и в разных фазах сна по отдельности;
 6,7) имеют менее длительные продолжительность жизни и период вынашивания потомства. 
 Проверим это с помощью критериев.
 
@@ -218,6 +196,12 @@ dfNew2 <- dplyr::filter(dfNew, EXP_IND == 2)
 dfNew3 <- dplyr::filter(dfNew, EXP_IND == 3)
 dfNew4 <- dplyr::filter(dfNew, EXP_IND == 4)
 dfNew5 <- dplyr::filter(dfNew, EXP_IND == 5)
+
+length(dfNew1$NAME)
+length(dfNew2$NAME)
+length(dfNew3$NAME)
+length(dfNew4$NAME)
+length(dfNew5$NAME)
 ```
 
 ```{r}
@@ -337,6 +321,36 @@ t.test(dfNew3$GESTTIME, dfNew5$GESTTIME, alternative="less")
 t.test(dfNew4$GESTTIME, dfNew5$GESTTIME, alternative="less")
 ```
 Тесты подтверждают результаты, наблюдаемые на box-plot-ах. 
+
+## Дальше смотреть не надо.
+Посмотрим на корреляции между признаками.
+```{r, warning=FALSE, message = FALSE}
+library(reshape)
+```
+
+```{r, warning=FALSE, message = FALSE}
+dplyr::select(dfNew, -NAME) %>%
+mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
+cor(method = "pearson", use = "pairwise.complete.obs") %>%
+melt() %>%
+ggplot(aes(X1, X2)) +
+  geom_raster(aes(fill = value)) +
+  geom_text(aes(label = round(value, 3))) +
+  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
+  ggtitle("dfNew pearson") +
+  theme(axis.text.x = element_text(angle = 50, hjust = 1))
+
+dplyr::select(dfNew, -NAME) %>%
+mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
+cor(method = "spearman", use = "pairwise.complete.obs") %>%
+melt() %>%
+ggplot(aes(X1, X2)) +
+  geom_raster(aes(fill = value)) +
+  geom_text(aes(label = round(value, 3))) +
+  scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
+  ggtitle("dfNew spearman") +
+  theme(axis.text.x = element_text(angle = 50, hjust = 1))
+```
 
 Опишем распределения признаков.
 Изобразим гистограммы признаков на фоне плотности нормального распределения.
