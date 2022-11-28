@@ -4,6 +4,7 @@ output: html_document
 date: "2022-11-11"
 ---
 
+## Предварительный анализ данных
 Прочитаем и обработаем данные. Среди данных не может быть отрицательных значений, 
 NA обозначаются как -999.
 ```{r, message=FALSE, warning=FALSE}
@@ -19,6 +20,8 @@ df[df < 0] <- NA
 head(df)
 length(df$NAME)
 ```
+Кроме индексов-факторов, все признаки количественные. Индексы - порядковые признаки.
+
 Посмотрим на данные.
 ```{r, message=FALSE, warning=FALSE}
 library(ggplot2)
@@ -28,7 +31,7 @@ library(GGally)
 ```{r, message=FALSE, warning=FALSE}
 df %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), 
-          columns = c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
+          columns = c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "PARADOX", "SLEEP", "LIFESPAN", "GESTTIME"))
 ```
 Преобразуем данные. Переведем вес животного в граммы, продолжительность жизни в
 дни. Логарифмируем данные, чтобы было легче наблюдать корреляции (выше заметны 
@@ -43,17 +46,113 @@ dfNew <- df %>% mutate(PRED_IND = as.factor(PRED_IND), EXP_IND = as.factor(EXP_I
 ```{r, message=FALSE, warning=FALSE}
 dfNew %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), 
-          columns = c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
+          columns = c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "PARADOX", "SLEEP", "LIFESPAN", "GESTTIME"))
 dfNew %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), aes(colour=PRED_IND), legend=1,
-          columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
+          columns=c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "PARADOX", "SLEEP", "LIFESPAN", "GESTTIME"))
 dfNew %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), aes(colour=EXP_IND), legend=1,
-          columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
+          columns=c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "PARADOX", "SLEEP", "LIFESPAN", "GESTTIME"))
 dfNew %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), aes(colour=DANG_IND), legend=1,
-          columns=c("BODY_WEI", "BRAIN_WE", "SLEEP", "LIFESPAN", "GESTTIME"))
+          columns=c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "PARADOX", "SLEEP", "LIFESPAN", "GESTTIME"))
 ```
+Используем описательные статистики для распределений признаков в изначальной 
+и новой выборках.
+```{r}
+library(moments)
+```
+
+Вес тела.
+```{r}
+cat("df:\n")
+mean(df$BODY_WEI, na.rm = TRUE)
+quantile(df$BODY_WEI, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(df$BODY_WEI, na.rm = TRUE)
+skewness(df$BODY_WEI, na.rm = TRUE)
+
+cat("\ndfNew:\n")
+mean(dfNew$BODY_WEI, na.rm = TRUE)
+quantile(dfNew$BODY_WEI, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(dfNew$BODY_WEI, na.rm = TRUE)
+skewness(dfNew$BODY_WEI, na.rm = TRUE)
+kurtosis(dfNew$BODY_WEI, na.rm = TRUE)
+```
+Вес мозга.
+```{r}
+cat("df:\n")
+mean(df$BRAIN_WE, na.rm = TRUE)
+quantile(df$BRAIN_WE, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(df$BRAIN_WE, na.rm = TRUE)
+skewness(df$BRAIN_WE, na.rm = TRUE)
+
+cat("\ndfNew:\n")
+mean(dfNew$BRAIN_WE, na.rm = TRUE)
+quantile(dfNew$BRAIN_WE, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(dfNew$BRAIN_WE, na.rm = TRUE)
+skewness(dfNew$BRAIN_WE, na.rm = TRUE)
+kurtosis(dfNew$BRAIN_WE, na.rm = TRUE)
+```
+Медленный сон.
+```{r}
+cat("df:\n")
+mean(df$SLOWWAVE, na.rm = TRUE)
+quantile(df$SLOWWAVE, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(df$SLOWWAVE, na.rm = TRUE)
+skewness(df$SLOWWAVE, na.rm = TRUE)
+kurtosis(dfNew$SLOWWAVE, na.rm = TRUE)
+```
+Быстрый сон.
+```{r}
+cat("df:\n")
+mean(df$PARADOX, na.rm = TRUE)
+quantile(df$PARADOX, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(df$PARADOX, na.rm = TRUE)
+skewness(df$PARADOX, na.rm = TRUE)
+kurtosis(dfNew$PARADOX, na.rm = TRUE)
+```
+Cон.
+```{r}
+cat("df:\n")
+mean(df$SLEEP, na.rm = TRUE)
+quantile(df$SLEEP, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(df$SLEEP, na.rm = TRUE)
+skewness(df$SLEEP, na.rm = TRUE)
+kurtosis(dfNew$SLEEP, na.rm = TRUE)
+```
+Продолжительность жизни.
+```{r}
+cat("df:\n")
+mean(df$LIFESPAN, na.rm = TRUE)
+quantile(df$LIFESPAN, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(df$LIFESPAN, na.rm = TRUE)
+skewness(df$LIFESPAN, na.rm = TRUE)
+
+cat("\ndfNew:\n")
+mean(dfNew$LIFESPAN, na.rm = TRUE)
+quantile(dfNew$LIFESPAN, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(dfNew$LIFESPAN, na.rm = TRUE)
+skewness(dfNew$LIFESPAN, na.rm = TRUE)
+kurtosis(dfNew$LIFESPAN, na.rm = TRUE)
+```
+Продолжительность периода вынашивания потомства.
+```{r}
+cat("df:\n")
+mean(df$GESTTIME, na.rm = TRUE)
+quantile(df$GESTTIME, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(df$GESTTIME, na.rm = TRUE)
+skewness(df$GESTTIME, na.rm = TRUE)
+
+cat("\ndfNew:\n")
+mean(dfNew$GESTTIME, na.rm = TRUE)
+quantile(dfNew$GESTTIME, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(dfNew$GESTTIME, na.rm = TRUE)
+skewness(dfNew$GESTTIME, na.rm = TRUE)
+kurtosis(dfNew$GESTTIME, na.rm = TRUE)
+```
+
+
+## Дальше смотреть не надо.
 Посмотрим на корреляции между признаками.
 ```{r, warning=FALSE, message = FALSE}
 library(reshape)
@@ -81,7 +180,6 @@ ggplot(aes(X1, X2)) +
   scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
   ggtitle("dfNew spearman") +
   theme(axis.text.x = element_text(angle = 50, hjust = 1))
-  
 ```
 Опишем разницу между животными по степени опасности места, где
 они спят.
@@ -123,7 +221,7 @@ t.test(dfNew3$BODY_WEI, dfNew5$BODY_WEI, alternative="less")
 
 t.test(dfNew4$BODY_WEI, dfNew5$BODY_WEI, alternative="less")
 ```
-Потчти все гипотезы о равенстве мат. ожидание отверглись в пользу того, что
+Потчти все гипотезы о равенстве мат. ожиданий отверглись в пользу того, что
 животное, которое спит в более защищенном месте весит меньше, с уровнем 
 значимости 0.05.
 ```{r}
@@ -142,7 +240,7 @@ t.test(dfNew3$BRAIN_WE, dfNew5$BRAIN_WE, alternative="less")
 t.test(dfNew4$BRAIN_WE, dfNew5$BRAIN_WE, alternative="less")
 ```
 Если не учитывать животных, близких друг другу по значению EXP_IND, то потчти 
-все гипотезы о равенстве мат. ожидание отверглись в пользу того, что животное, 
+все гипотезы о равенстве мат. ожиданий отверглись в пользу того, что животное, 
 которое спит в более защищенном месте имеет меньший вес мозга, с уровнем 
 значимости 0.05.
 ```{r}
@@ -270,7 +368,7 @@ ks.test(dfNew$SLEEP, "pnorm", mean = mean(dfNew$SLEEP, na.rm=TRUE), sd = sd(dfNe
 ks.test(dfNew$LIFESPAN, "pnorm", mean = mean(dfNew$LIFESPAN, na.rm=TRUE), sd = sd(dfNew$LIFESPAN, na.rm=TRUE))
 ks.test(dfNew$GESTTIME, "pnorm", mean = mean(dfNew$GESTTIME, na.rm=TRUE), sd = sd(dfNew$GESTTIME, na.rm=TRUE))
 ```
-Все тесты не отрецают, что признаки имеют нормальное распределение с уровнем 
+Все тесты не отрицают, что признаки имеют нормальное распределение с уровнем 
 значимости 0.5.
 
 В качестве описания зависимостей между критериями выше представленны ggpairs и
