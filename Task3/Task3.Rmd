@@ -255,7 +255,7 @@ dfNew %>% ggplot(aes(y=GESTTIME, colour=EXP_IND)) + geom_boxplot()
 6,7) имеют менее длительные продолжительность жизни и период вынашивания потомства. 
 Проверим это с помощью критериев.
 
-Давайте проверим наблюдения 1,3,6) c помощью критериев для животных, живущих
+Давайте проверим наблюдения 1,3) c помощью критериев для животных, живущих
 в ниболее и в наименее защищенных местах.
 ```{r}
 dfNew1 <- dplyr::filter(dfNew, EXP_IND == 1)
@@ -265,20 +265,42 @@ length(dfNew1$NAME)
 length(dfNew5$NAME)
 ```
 Ранее мы узнали, что признаки распределены нормально, но сейчас мы будем сравнивать
-разные группы индивидов, признаки внутри которых могут уже не имеют нормальность,
-ограничимся здесь визуальным подверждением утверждения.
-Отсутствие нормальности можно было наблюдать на окрашенном ggpairs, но лучше
-это демонстрирует следующий график.
+разные группы индивидов, признаки внутри которых могут уже не имеют нормальность.
+Проверим это графически и тестами.
 ```{r, warning=FALSE, message = FALSE}
-ggplot(dfMelt, aes(x = value, colour=EXP_IND)) +
-        stat_ecdf() +
-        facet_wrap(~variable, scales = "free") +
+ggplot(dfNew1, aes(x = BODY_WEI)) +
+        geom_histogram(aes(y = ..density..)) +
         labs(x = "", y = "") +
-        geom_line(aes(y = pnorm(value,
-                      mean = tapply(value, variable, mean, na.rm = TRUE)[PANEL],
-                      sd = tapply(value, variable, sd, na.rm = TRUE)[PANEL]
-                      )), color = "blue")
+        geom_line(aes(y = dnorm(BODY_WEI, mean = mean(BODY_WEI, na.rm=TRUE), 
+                                sd = sd(BODY_WEI, na.rm=TRUE))), color = "blue")
+ggplot(dfNew1, aes(x = SLEEP)) +
+        geom_histogram(aes(y = ..density..)) +
+        labs(x = "", y = "") +
+        geom_line(aes(y = dnorm(SLEEP, mean = mean(SLEEP, na.rm=TRUE), 
+                                sd = sd(SLEEP, na.rm=TRUE))), color = "blue")
+
+ggplot(dfNew5, aes(x = BODY_WEI)) +
+        geom_histogram(aes(y = ..density..)) +
+        labs(x = "", y = "") +
+        geom_line(aes(y = dnorm(BODY_WEI, mean = mean(BODY_WEI, na.rm=TRUE), 
+                                sd = sd(BODY_WEI, na.rm=TRUE))), color = "blue")
+ggplot(dfNew5, aes(x = SLEEP)) +
+        geom_histogram(aes(y = ..density..)) +
+        labs(x = "", y = "") +
+        geom_line(aes(y = dnorm(SLEEP, mean = mean(SLEEP, na.rm=TRUE), 
+                                sd = sd(SLEEP, na.rm=TRUE))), color = "blue")
 ```
+По графикам судить трудно. Используем тест Колмогорова-Смирнова.
+```{r, warning=FALSE, message = FALSE}
+ks.test(dfNew1$BODY_WEI, "pnorm", mean = mean(dfNew1$BODY_WEI, na.rm=TRUE), sd = sd(dfNew1$BODY_WEI, na.rm=TRUE))
+ks.test(dfNew1$SLEEP, "pnorm", mean = mean(dfNew1$SLEEP, na.rm=TRUE), sd = sd(dfNew1$SLEEP, na.rm=TRUE))
+
+ks.test(dfNew2$BODY_WEI, "pnorm", mean = mean(dfNew2$BODY_WEI, na.rm=TRUE), sd = sd(dfNew2$BODY_WEI, na.rm=TRUE))
+ks.test(dfNew2$SLEEP, "pnorm", mean = mean(dfNew2$SLEEP, na.rm=TRUE), sd = sd(dfNew2$SLEEP, na.rm=TRUE))
+```
+Тесты не отвергли гипотезу о нормальности признаков внутри групп.
+
+
 Группы у нас независимые и не имеют нормальное распределение. Поэтому будем использовать критерии для независимых с.в.
 ```{r}
 t.test(dfNew1$BODY_WEI, dfNew2$BODY_WEI, alternative="less")
