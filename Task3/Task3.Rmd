@@ -175,9 +175,9 @@ library(reshape)
 Изобразим гистограммы признаков на фоне плотности нормального распределения.
 ```{r, warning=FALSE, message = FALSE}
 dfMelt <- dfNew %>% 
-  dplyr::select(-PRED_IND, -EXP_IND, -DANG_IND) %>% 
+  dplyr::select(-PRED_IND, -DANG_IND) %>% 
   as.data.frame(dfNew) %>% 
-  melt(id.vars = "NAME")
+  melt(id.vars = c("NAME", "EXP_IND"))
 
 ggplot(dfMelt, aes(x = value)) +
         geom_histogram(aes(y = ..density..)) +
@@ -213,6 +213,7 @@ ggplot(dfMelt, aes(sample = value)) +
         labs(x = "", y = "") +
         stat_pp_line(color = "blue")
 ```
+
 ```{r, warning=FALSE, message = FALSE}
 ggplot(dfMelt, aes(sample = value)) +
         stat_qq_point(size = 1) +
@@ -220,13 +221,11 @@ ggplot(dfMelt, aes(sample = value)) +
         labs(x = "", y = "") +
         stat_qq_line(color = "blue")
 ```
-
-
-Проверим это с помощью признаков.
+Проверим нормальность с помощью признаков.
 
 Используем критерий Колмогорова-Смирнова, так как распределения абсолютно 
 непрерывны.
-```{r}
+```{r, warning=FALSE, message = FALSE}
 ks.test(dfNew$BODY_WEI, "pnorm", mean = mean(dfNew$BODY_WEI, na.rm=TRUE), sd = sd(dfNew$BODY_WEI, na.rm=TRUE))
 ks.test(dfNew$BRAIN_WE, "pnorm", mean = mean(dfNew$BRAIN_WE, na.rm=TRUE), sd = sd(dfNew$BRAIN_WE, na.rm=TRUE))
 ks.test(dfNew$SLOWWAVE, "pnorm", mean = mean(dfNew$SLOWWAVE, na.rm=TRUE), sd = sd(dfNew$SLOWWAVE, na.rm=TRUE))
@@ -256,21 +255,31 @@ dfNew %>% ggplot(aes(y=GESTTIME, colour=EXP_IND)) + geom_boxplot()
 6,7) имеют менее длительные продолжительность жизни и период вынашивания потомства. 
 Проверим это с помощью критериев.
 
-Используем Welch-test, так как выборки независимые и нам не известны дисперсии.
+Давайте проверим наблюдения 1,3,6) c помощью критериев для животных, живущих
+в ниболее и в наименее защищенных местах.
 ```{r}
 dfNew1 <- dplyr::filter(dfNew, EXP_IND == 1)
-dfNew2 <- dplyr::filter(dfNew, EXP_IND == 2)
-dfNew3 <- dplyr::filter(dfNew, EXP_IND == 3)
-dfNew4 <- dplyr::filter(dfNew, EXP_IND == 4)
 dfNew5 <- dplyr::filter(dfNew, EXP_IND == 5)
 
 length(dfNew1$NAME)
-length(dfNew2$NAME)
-length(dfNew3$NAME)
-length(dfNew4$NAME)
 length(dfNew5$NAME)
 ```
-
+Ранее мы узнали, что признаки распределены нормально, но сейчас мы будем сравнивать
+разные группы индивидов, признаки внутри которых могут уже не имеют нормальность,
+ограничимся здесь визуальным подверждением утверждения.
+Отсутствие нормальности можно было наблюдать на окрашенном ggpairs, но лучше
+это демонстрирует следующий график.
+```{r, warning=FALSE, message = FALSE}
+ggplot(dfMelt, aes(x = value, colour=EXP_IND)) +
+        stat_ecdf() +
+        facet_wrap(~variable, scales = "free") +
+        labs(x = "", y = "") +
+        geom_line(aes(y = pnorm(value,
+                      mean = tapply(value, variable, mean, na.rm = TRUE)[PANEL],
+                      sd = tapply(value, variable, sd, na.rm = TRUE)[PANEL]
+                      )), color = "blue")
+```
+Группы у нас независимые и не имеют нормальное распределение. Поэтому будем использовать критерии для независимых с.в.
 ```{r}
 t.test(dfNew1$BODY_WEI, dfNew2$BODY_WEI, alternative="less")
 t.test(dfNew1$BODY_WEI, dfNew3$BODY_WEI, alternative="less")
@@ -388,7 +397,7 @@ t.test(dfNew3$GESTTIME, dfNew5$GESTTIME, alternative="less")
 t.test(dfNew4$GESTTIME, dfNew5$GESTTIME, alternative="less")
 ```
 Тесты подтверждают результаты, наблюдаемые на box-plot-ах. 
-
+-------------------------------------------------------
 ## Дальше смотреть не надо.
 Посмотрим на корреляции между признаками.
 ```{r, warning=FALSE, message = FALSE}
