@@ -300,26 +300,42 @@ ks.test(dfNew2$SLEEP, "pnorm", mean = mean(dfNew2$SLEEP, na.rm=TRUE), sd = sd(df
 ```
 Тесты не отвергли гипотезу о нормальности признаков внутри групп.
 
+Итак. Группы у нас независимые и  имеют нормальное распределение, поэтому будем 
+использовать критерии для независимых с.в., а t-тесты будут точными, если все будет
+хорошо с дисперсиями.
 
-Группы у нас независимые и не имеют нормальное распределение. Поэтому будем использовать критерии для независимых с.в.
+Перед тем как использовать t-тесты нужно узнать, равные ли дисперсии среди групп,
+так как у нас есть нормальность используем тест Фишера, который является точным, 
+и еще используем тест Левена.
 ```{r}
-t.test(dfNew1$BODY_WEI, dfNew2$BODY_WEI, alternative="less")
-t.test(dfNew1$BODY_WEI, dfNew3$BODY_WEI, alternative="less")
-t.test(dfNew1$BODY_WEI, dfNew4$BODY_WEI, alternative="less")
+var.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI)
+var.test(dfNew1$SLEEP, dfNew5$SLEEP)
+
+t.test((dfNew1$BODY_WEI - mean(dfNew1$BODY_WEI, na.rm = TRUE)) * 
+         (dfNew1$BODY_WEI - mean(dfNew1$BODY_WEI, na.rm = TRUE)), 
+       (dfNew5$BODY_WEI - mean(dfNew5$BODY_WEI, na.rm = TRUE)) * 
+         (dfNew5$BODY_WEI - mean(dfNew5$BODY_WEI, na.rm = TRUE)))
+t.test((dfNew1$SLEEP - mean(dfNew1$SLEEP, na.rm = TRUE)) * 
+         (dfNew1$SLEEP - mean(dfNew1$SLEEP, na.rm = TRUE)), 
+       (dfNew5$SLEEP - mean(dfNew5$SLEEP, na.rm = TRUE)) * 
+         (dfNew5$SLEEP - mean(dfNew5$SLEEP, na.rm = TRUE)))
+```
+Видно, что тест Левена менее мощный, так как он асимптотический из-за отсутствия 
+нормальности у квадратов. Для веса дисперсии одинаковые, а для сна нет. 
+
+Посмотрим на результаты тестов 
+```{r}
+
+```
+
+
+```{r}
 t.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI, alternative="less")
-
-t.test(dfNew2$BODY_WEI, dfNew3$BODY_WEI, alternative="less")
-t.test(dfNew2$BODY_WEI, dfNew4$BODY_WEI, alternative="less")
-t.test(dfNew2$BODY_WEI, dfNew5$BODY_WEI, alternative="less")
-
-t.test(dfNew3$BODY_WEI, dfNew4$BODY_WEI, alternative="less")
-t.test(dfNew3$BODY_WEI, dfNew5$BODY_WEI, alternative="less")
-
-t.test(dfNew4$BODY_WEI, dfNew5$BODY_WEI, alternative="less")
+t.test(dfNew1$SLEEP, dfNew5$SLEEP, alternative="greate")
 ```
 Потчти все гипотезы о равенстве мат. ожиданий отверглись в пользу того, что
-животное, которое спит в более защищенном месте весит меньше, с уровнем 
-значимости 0.05.
+животное, которое спит в более защищенном месте весит меньше и спит больше, 
+с уровнем значимости 0.05.
 ```{r}
 t.test(dfNew1$BRAIN_WE, dfNew2$BRAIN_WE, alternative="less")
 t.test(dfNew1$BRAIN_WE, dfNew3$BRAIN_WE, alternative="less")
