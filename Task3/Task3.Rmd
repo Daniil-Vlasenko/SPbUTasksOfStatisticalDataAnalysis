@@ -260,6 +260,8 @@ dfNew %>% ggplot(aes(y=GESTTIME, colour=EXP_IND)) + geom_boxplot()
 ```{r}
 dfNew1 <- dplyr::filter(dfNew, EXP_IND == 1)
 dfNew5 <- dplyr::filter(dfNew, EXP_IND == 5)
+df1 <- dplyr::filter(df, EXP_IND == 1)
+df5 <- dplyr::filter(df, EXP_IND == 5)
 
 length(dfNew1$NAME)
 length(dfNew5$NAME)
@@ -291,8 +293,8 @@ ggplot(dfNew5, aes(sample = SLEEP)) +
 ks.test(dfNew1$BODY_WEI, "pnorm", mean = mean(dfNew1$BODY_WEI, na.rm=TRUE), sd = sd(dfNew1$BODY_WEI, na.rm=TRUE))
 ks.test(dfNew1$SLEEP, "pnorm", mean = mean(dfNew1$SLEEP, na.rm=TRUE), sd = sd(dfNew1$SLEEP, na.rm=TRUE))
 
-ks.test(dfNew2$BODY_WEI, "pnorm", mean = mean(dfNew2$BODY_WEI, na.rm=TRUE), sd = sd(dfNew2$BODY_WEI, na.rm=TRUE))
-ks.test(dfNew2$SLEEP, "pnorm", mean = mean(dfNew2$SLEEP, na.rm=TRUE), sd = sd(dfNew2$SLEEP, na.rm=TRUE))
+ks.test(dfNew5$BODY_WEI, "pnorm", mean = mean(dfNew5$BODY_WEI, na.rm=TRUE), sd = sd(dfNew5$BODY_WEI, na.rm=TRUE))
+ks.test(dfNew5$SLEEP, "pnorm", mean = mean(dfNew5$SLEEP, na.rm=TRUE), sd = sd(dfNew5$SLEEP, na.rm=TRUE))
 ```
 Тесты не отвергли гипотезу о нормальности признаков внутри групп.
 
@@ -316,7 +318,7 @@ t.test((dfNew1$SLEEP - mean(dfNew1$SLEEP, na.rm = TRUE)) *
 ```
 Для веса дисперсии одинаковые, а для сна нет. 
 
-Посмотрим на t-тесты сравными и неравными дисперсиями.
+Посмотрим на t-тесты с равными и неравными дисперсиями.
 ```{r}
 t.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI, var.equal=TRUE, alternative="less")
 t.test(dfNew1$SLEEP, dfNew5$SLEEP, var.equal=TRUE, alternative="greate")
@@ -342,13 +344,8 @@ ks.test(dfNew1$SLEEP, dfNew5$SLEEP)
 ```
 Гипотезы так же отверглись.
 
-
-
-
-
-
--------------------------------------------------------
-## Дальше смотреть не надо.
+# Об анализе зависимостей
+## Индивидуальное задание 3.
 Посмотрим на корреляции между признаками.
 ```{r, warning=FALSE, message = FALSE}
 dplyr::select(dfNew, -NAME) %>%
@@ -373,9 +370,7 @@ ggplot(aes(X1, X2)) +
   ggtitle("dfNew spearman") +
   theme(axis.text.x = element_text(angle = 50, hjust = 1))
 ```
-
-В качестве описания зависимостей между критериями выше представленны ggpairs и
-correlation matrix plot. Также посчитаем интересные частные корреляции.
+Также посчитаем интересные частные корреляции.
 ```{r, warning=FALSE, message = FALSE}
 library(ppcor)
 ```
