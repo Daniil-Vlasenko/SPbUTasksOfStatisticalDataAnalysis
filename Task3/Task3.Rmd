@@ -268,27 +268,23 @@ length(dfNew5$NAME)
 разные группы индивидов, признаки внутри которых могут уже не имеют нормальность.
 Проверим это графически и тестами.
 ```{r, warning=FALSE, message = FALSE}
-ggplot(dfNew1, aes(x = BODY_WEI)) +
-        geom_histogram(aes(y = ..density..)) +
+ggplot(dfNew1, aes(sample = BODY_WEI)) +
+        stat_pp_point(size = 1) +
         labs(x = "", y = "") +
-        geom_line(aes(y = dnorm(BODY_WEI, mean = mean(BODY_WEI, na.rm=TRUE), 
-                                sd = sd(BODY_WEI, na.rm=TRUE))), color = "blue")
-ggplot(dfNew1, aes(x = SLEEP)) +
-        geom_histogram(aes(y = ..density..)) +
+        stat_pp_line(color = "blue")
+ggplot(dfNew1, aes(sample = SLEEP)) +
+        stat_pp_point(size = 1) +
         labs(x = "", y = "") +
-        geom_line(aes(y = dnorm(SLEEP, mean = mean(SLEEP, na.rm=TRUE), 
-                                sd = sd(SLEEP, na.rm=TRUE))), color = "blue")
+        stat_pp_line(color = "blue")
 
-ggplot(dfNew5, aes(x = BODY_WEI)) +
-        geom_histogram(aes(y = ..density..)) +
+ggplot(dfNew5, aes(sample = BODY_WEI)) +
+        stat_pp_point(size = 1) +
         labs(x = "", y = "") +
-        geom_line(aes(y = dnorm(BODY_WEI, mean = mean(BODY_WEI, na.rm=TRUE), 
-                                sd = sd(BODY_WEI, na.rm=TRUE))), color = "blue")
-ggplot(dfNew5, aes(x = SLEEP)) +
-        geom_histogram(aes(y = ..density..)) +
+        stat_pp_line(color = "blue")
+ggplot(dfNew5, aes(sample = SLEEP)) +
+        stat_pp_point(size = 1) +
         labs(x = "", y = "") +
-        geom_line(aes(y = dnorm(SLEEP, mean = mean(SLEEP, na.rm=TRUE), 
-                                sd = sd(SLEEP, na.rm=TRUE))), color = "blue")
+        stat_pp_line(color = "blue")
 ```
 По графикам судить трудно. Используем тест Колмогорова-Смирнова.
 ```{r, warning=FALSE, message = FALSE}
@@ -300,9 +296,7 @@ ks.test(dfNew2$SLEEP, "pnorm", mean = mean(dfNew2$SLEEP, na.rm=TRUE), sd = sd(df
 ```
 Тесты не отвергли гипотезу о нормальности признаков внутри групп.
 
-Итак. Группы у нас независимые и  имеют нормальное распределение, поэтому будем 
-использовать критерии для независимых с.в., а t-тесты будут точными, если все будет
-хорошо с дисперсиями.
+Итак. Группы у нас независимые и  имеют нормальное распределение.
 
 Перед тем как использовать t-тесты нужно узнать, равные ли дисперсии среди групп,
 так как у нас есть нормальность используем тест Фишера, который является точным, 
@@ -320,121 +314,33 @@ t.test((dfNew1$SLEEP - mean(dfNew1$SLEEP, na.rm = TRUE)) *
        (dfNew5$SLEEP - mean(dfNew5$SLEEP, na.rm = TRUE)) * 
          (dfNew5$SLEEP - mean(dfNew5$SLEEP, na.rm = TRUE)))
 ```
-Видно, что тест Левена менее мощный, так как он асимптотический из-за отсутствия 
-нормальности у квадратов. Для веса дисперсии одинаковые, а для сна нет. 
+Для веса дисперсии одинаковые, а для сна нет. 
 
-Посмотрим на результаты тестов 
+Посмотрим на t-тесты сравными и неравными дисперсиями.
 ```{r}
+t.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI, var.equal=TRUE, alternative="less")
+t.test(dfNew1$SLEEP, dfNew5$SLEEP, var.equal=TRUE, alternative="greate")
 
+t.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI, var.equal=FALSE, alternative="less")
+t.test(dfNew1$SLEEP, dfNew5$SLEEP, var.equal=FALSE, alternative="greate")
+```
+Первый тест точный, второй используется не по назначению, третий и четвертный 
+ассимптотические. Как и предполагалось отверглись гипотезы в пользу того, 
+что мы наблюдали на box-plot-ах выше.
+
+Воспользуемся непараметрическими t-тестами.
+```{r}
+wilcox.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI)
+wilcox.test(dfNew1$SLEEP, dfNew5$SLEEP)
 ```
 
 
-```{r}
-t.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI, alternative="less")
-t.test(dfNew1$SLEEP, dfNew5$SLEEP, alternative="greate")
-```
-Потчти все гипотезы о равенстве мат. ожиданий отверглись в пользу того, что
-животное, которое спит в более защищенном месте весит меньше и спит больше, 
-с уровнем значимости 0.05.
-```{r}
-t.test(dfNew1$BRAIN_WE, dfNew2$BRAIN_WE, alternative="less")
-t.test(dfNew1$BRAIN_WE, dfNew3$BRAIN_WE, alternative="less")
-t.test(dfNew1$BRAIN_WE, dfNew4$BRAIN_WE, alternative="less")
-t.test(dfNew1$BRAIN_WE, dfNew5$BRAIN_WE, alternative="less")
 
-t.test(dfNew2$BRAIN_WE, dfNew3$BRAIN_WE, alternative="less")
-t.test(dfNew2$BRAIN_WE, dfNew4$BRAIN_WE, alternative="less")
-t.test(dfNew2$BRAIN_WE, dfNew5$BRAIN_WE, alternative="less")
 
-t.test(dfNew3$BRAIN_WE, dfNew4$BRAIN_WE, alternative="less")
-t.test(dfNew3$BRAIN_WE, dfNew5$BRAIN_WE, alternative="less")
 
-t.test(dfNew4$BRAIN_WE, dfNew5$BRAIN_WE, alternative="less")
-```
-Если не учитывать животных, близких друг другу по значению EXP_IND, то потчти 
-все гипотезы о равенстве мат. ожиданий отверглись в пользу того, что животное, 
-которое спит в более защищенном месте имеет меньший вес мозга, с уровнем 
-значимости 0.05.
-```{r}
-t.test(dfNew1$SLOWWAVE, dfNew2$SLOWWAVE, alternative="greater")
-t.test(dfNew1$SLOWWAVE, dfNew3$SLOWWAVE, alternative="greater")
-t.test(dfNew1$SLOWWAVE, dfNew4$SLOWWAVE, alternative="greater")
-t.test(dfNew1$SLOWWAVE, dfNew5$SLOWWAVE, alternative="greater")
 
-t.test(dfNew2$SLOWWAVE, dfNew3$SLOWWAVE, alternative="greater")
-t.test(dfNew2$SLOWWAVE, dfNew4$SLOWWAVE, alternative="greater")
-t.test(dfNew2$SLOWWAVE, dfNew5$SLOWWAVE, alternative="greater")
 
-t.test(dfNew3$SLOWWAVE, dfNew4$SLOWWAVE, alternative="greater")
-t.test(dfNew3$SLOWWAVE, dfNew5$SLOWWAVE, alternative="greater")
 
-t.test(dfNew4$SLOWWAVE, dfNew5$SLOWWAVE, alternative="greater")
-```
-Тесты подтверждают результаты, наблюдаемые на box-plot-ах. 
-```{r}
-t.test(dfNew1$PARADOX, dfNew2$PARADOX, alternative="greater")
-t.test(dfNew1$PARADOX, dfNew3$PARADOX, alternative="greater")
-t.test(dfNew1$PARADOX, dfNew4$PARADOX, alternative="greater")
-t.test(dfNew1$PARADOX, dfNew5$PARADOX, alternative="greater")
-
-t.test(dfNew2$PARADOX, dfNew3$PARADOX, alternative="greater")
-t.test(dfNew2$PARADOX, dfNew4$PARADOX, alternative="greater")
-t.test(dfNew2$PARADOX, dfNew5$PARADOX, alternative="greater")
-
-t.test(dfNew3$PARADOX, dfNew4$PARADOX, alternative="greater")
-t.test(dfNew3$PARADOX, dfNew5$PARADOX, alternative="greater")
-
-t.test(dfNew4$PARADOX, dfNew5$PARADOX, alternative="greater")
-```
-Тесты подтверждают результаты, наблюдаемые на box-plot-ах. 
-```{r}
-t.test(dfNew1$SLEEP, dfNew2$SLEEP, alternative="greater")
-t.test(dfNew1$SLEEP, dfNew3$SLEEP, alternative="greater")
-t.test(dfNew1$SLEEP, dfNew4$SLEEP, alternative="greater")
-t.test(dfNew1$SLEEP, dfNew5$SLEEP, alternative="greater")
-
-t.test(dfNew2$SLEEP, dfNew3$SLEEP, alternative="greater")
-t.test(dfNew2$SLEEP, dfNew4$SLEEP, alternative="greater")
-t.test(dfNew2$SLEEP, dfNew5$SLEEP, alternative="greater")
-
-t.test(dfNew3$SLEEP, dfNew4$SLEEP, alternative="greater")
-t.test(dfNew3$SLEEP, dfNew5$SLEEP, alternative="greater")
-
-t.test(dfNew4$SLEEP, dfNew5$SLEEP, alternative="greater")
-```
-Тесты подтверждают результаты, наблюдаемые на box-plot-ах. 
-```{r}
-t.test(dfNew1$LIFESPAN, dfNew2$LIFESPAN, alternative="less")
-t.test(dfNew1$LIFESPAN, dfNew3$LIFESPAN, alternative="less")
-t.test(dfNew1$LIFESPAN, dfNew4$LIFESPAN, alternative="less")
-t.test(dfNew1$LIFESPAN, dfNew5$LIFESPAN, alternative="less")
-
-t.test(dfNew2$LIFESPAN, dfNew3$LIFESPAN, alternative="less")
-t.test(dfNew2$LIFESPAN, dfNew4$LIFESPAN, alternative="less")
-t.test(dfNew2$LIFESPAN, dfNew5$LIFESPAN, alternative="less")
-
-t.test(dfNew3$LIFESPAN, dfNew4$LIFESPAN, alternative="less")
-t.test(dfNew3$LIFESPAN, dfNew5$LIFESPAN, alternative="less")
-
-t.test(dfNew4$LIFESPAN, dfNew5$LIFESPAN, alternative="less")
-```
-Тесты подтверждают результаты, наблюдаемые на box-plot-ах. 
-```{r}
-t.test(dfNew1$GESTTIME, dfNew2$GESTTIME, alternative="less")
-t.test(dfNew1$GESTTIME, dfNew3$GESTTIME, alternative="less")
-t.test(dfNew1$GESTTIME, dfNew4$GESTTIME, alternative="less")
-t.test(dfNew1$GESTTIME, dfNew5$GESTTIME, alternative="less")
-
-t.test(dfNew2$GESTTIME, dfNew3$GESTTIME, alternative="less")
-t.test(dfNew2$GESTTIME, dfNew4$GESTTIME, alternative="less")
-t.test(dfNew2$GESTTIME, dfNew5$GESTTIME, alternative="less")
-
-t.test(dfNew3$GESTTIME, dfNew4$GESTTIME, alternative="less")
-t.test(dfNew3$GESTTIME, dfNew5$GESTTIME, alternative="less")
-
-t.test(dfNew4$GESTTIME, dfNew5$GESTTIME, alternative="less")
-```
-Тесты подтверждают результаты, наблюдаемые на box-plot-ах. 
 -------------------------------------------------------
 ## Дальше смотреть не надо.
 Посмотрим на корреляции между признаками.
