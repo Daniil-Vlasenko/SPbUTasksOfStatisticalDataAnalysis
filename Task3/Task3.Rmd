@@ -5,8 +5,8 @@ date: "2022-11-11"
 ---
 
 ## Предварительный анализ данных.
-Прочитаем и обработаем данные. Среди данных не может быть отрицательных значений, 
-NA обозначаются как -999.
+1. Описание признаков присутствует в сопроводительном файле. Прочитаем данные. 
+Среди данных не может быть отрицательных значений, NA обозначаются как -999.
 ```{r, message=FALSE, warning=FALSE}
 library(readxl)
 library(dplyr)
@@ -18,11 +18,37 @@ df <- read_excel("Sleep/SLEEP_shortname.xls")
 df[df < 0] <- NA
 
 head(df)
-length(df$NAME)
 ```
-Кроме индексов-факторов, все признаки количественные. Индексы - порядковые признаки.
+Количество строк в таблице.
+```{r}
+nrow(df)
+```
 
-Посмотрим на данные.
+2. Признаков немного, поэтому рассматривать будем все.
+3. Кроме индексов-факторов, все признаки количественные. Индексы - порядковые признаки.
+Все количественные признаки непрерывные, но можно заметить дискретизацию при округлении.
+Проверим это, посмотрев на частоты мод.
+```{r}
+find_mode <- function(x) {
+  x <- x[!is.na(x)]
+  u <- unique(x)
+  tab <- tabulate(match(x, u))
+  c(u[tab == max(tab)],  max(tab))
+}
+
+find_mode(df$BODY_WEI)
+find_mode(df$BRAIN_WE)
+find_mode(df$SLOWWAVE)
+find_mode(df$PARADOX)
+find_mode(df$SLEEP)
+find_mode(df$LIFESPAN)
+find_mode(df$GESTTIME)
+```
+Функция выводит моды (если их несколько), потом частоту. Видно, что проблемы 
+с округлением есть.
+
+4. Не актуально для текущих данных.
+5. Посмотрим на данные.
 ```{r, message=FALSE, warning=FALSE}
 library(ggplot2)
 library(GGally)
@@ -33,7 +59,7 @@ df %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), 
           columns = c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "PARADOX", "SLEEP", "LIFESPAN", "GESTTIME"))
 ```
-Преобразуем данные. Переведем вес животного в граммы, продолжительность жизни в
+6. Преобразуем данные. Переведем вес животного в граммы, продолжительность жизни в
 дни. Логарифмируем данные, чтобы было легче наблюдать корреляции (выше заметны 
 сильно отличающиеся индивиды, это слоны). Факторизуем индексы.
 ```{r}
@@ -57,21 +83,16 @@ dfNew %>% dplyr::select(-NAME) %>%
   ggpairs(diag=list(continuous = "barDiag"), aes(colour=DANG_IND), legend=1,
           columns=c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "PARADOX", "SLEEP", "LIFESPAN", "GESTTIME"))
 ```
-Используем описательные статистики для распределений признаков в изначальной 
-и новой выборках.
+7. Аутлайнеров нет.
+8. Неоднородности нет.
+9. Не актуально для текущих данных.
+10. Используем описательные статистики для распределений признаков в новой выборке.
 ```{r}
 library(moments)
 library(entropy)
 ```
 Вес тела.
 ```{r}
-cat("df:\n")
-mean(df$BODY_WEI, na.rm = TRUE)
-quantile(df$BODY_WEI, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(df$BODY_WEI, na.rm = TRUE)
-skewness(df$BODY_WEI, na.rm = TRUE)
-
-cat("\ndfNew:\n")
 mean(dfNew$BODY_WEI, na.rm = TRUE)
 quantile(dfNew$BODY_WEI, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
 var(dfNew$BODY_WEI, na.rm = TRUE)
@@ -80,13 +101,6 @@ kurtosis(dfNew$BODY_WEI, na.rm = TRUE)
 ```
 Вес мозга.
 ```{r}
-cat("df:\n")
-mean(df$BRAIN_WE, na.rm = TRUE)
-quantile(df$BRAIN_WE, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(df$BRAIN_WE, na.rm = TRUE)
-skewness(df$BRAIN_WE, na.rm = TRUE)
-
-cat("\ndfNew:\n")
 mean(dfNew$BRAIN_WE, na.rm = TRUE)
 quantile(dfNew$BRAIN_WE, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
 var(dfNew$BRAIN_WE, na.rm = TRUE)
@@ -95,40 +109,30 @@ kurtosis(dfNew$BRAIN_WE, na.rm = TRUE)
 ```
 Медленный сон.
 ```{r}
-cat("df:\n")
-mean(df$SLOWWAVE, na.rm = TRUE)
-quantile(df$SLOWWAVE, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(df$SLOWWAVE, na.rm = TRUE)
-skewness(df$SLOWWAVE, na.rm = TRUE)
+mean(dfNew$SLOWWAVE, na.rm = TRUE)
+quantile(dfNew$SLOWWAVE, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(dfNew$SLOWWAVE, na.rm = TRUE)
+skewness(dfNew$SLOWWAVE, na.rm = TRUE)
 kurtosis(dfNew$SLOWWAVE, na.rm = TRUE)
 ```
 Быстрый сон.
 ```{r}
-cat("df:\n")
-mean(df$PARADOX, na.rm = TRUE)
-quantile(df$PARADOX, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(df$PARADOX, na.rm = TRUE)
-skewness(df$PARADOX, na.rm = TRUE)
+mean(dfNew$PARADOX, na.rm = TRUE)
+quantile(dfNew$PARADOX, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(dfNew$PARADOX, na.rm = TRUE)
+skewness(dfNew$PARADOX, na.rm = TRUE)
 kurtosis(dfNew$PARADOX, na.rm = TRUE)
 ```
 Cон.
 ```{r}
-cat("df:\n")
-mean(df$SLEEP, na.rm = TRUE)
-quantile(df$SLEEP, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(df$SLEEP, na.rm = TRUE)
-skewness(df$SLEEP, na.rm = TRUE)
+mean(dfNew$SLEEP, na.rm = TRUE)
+quantile(dfNew$SLEEP, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+var(dfNew$SLEEP, na.rm = TRUE)
+skewness(dfNew$SLEEP, na.rm = TRUE)
 kurtosis(dfNew$SLEEP, na.rm = TRUE)
 ```
 Продолжительность жизни.
 ```{r}
-cat("df:\n")
-mean(df$LIFESPAN, na.rm = TRUE)
-quantile(df$LIFESPAN, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(df$LIFESPAN, na.rm = TRUE)
-skewness(df$LIFESPAN, na.rm = TRUE)
-
-cat("\ndfNew:\n")
 mean(dfNew$LIFESPAN, na.rm = TRUE)
 quantile(dfNew$LIFESPAN, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
 var(dfNew$LIFESPAN, na.rm = TRUE)
@@ -137,36 +141,15 @@ kurtosis(dfNew$LIFESPAN, na.rm = TRUE)
 ```
 Продолжительность периода вынашивания потомства.
 ```{r}
-cat("df:\n")
-mean(df$GESTTIME, na.rm = TRUE)
-quantile(df$GESTTIME, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(df$GESTTIME, na.rm = TRUE)
-skewness(df$GESTTIME, na.rm = TRUE)
-
-cat("\ndfNew:\n")
 mean(dfNew$GESTTIME, na.rm = TRUE)
 quantile(dfNew$GESTTIME, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
 var(dfNew$GESTTIME, na.rm = TRUE)
 skewness(dfNew$GESTTIME, na.rm = TRUE)
 kurtosis(dfNew$GESTTIME, na.rm = TRUE)
 ```
-Идекс, отражающий опасность стать добычей.
-```{r}
-quantile(df$PRED_IND, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-entropy.empirical(df$PRED_IND, unit="log2")
-```
-Идекс, отражающий безопасность места, где спит животное.
-```{r}
-quantile(df$EXP_IND, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-entropy.empirical(df$EXP_IND, unit="log2")
-```
-Идекс, отражающий опасность, в которой находиться животное.
-```{r}
-quantile(df$DANG_IND, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-entropy.empirical(df$DANG_IND, unit="log2")
-```
 
 ## О виде распределений и о сравнении распределений.
+1. Проверим распределения признаков на нормальность.
 ### Индивидуальное задание 2.
 Опишем распределения признаков.
 ```{r, warning=FALSE, message = FALSE}
@@ -237,8 +220,6 @@ ks.test(dfNew$GESTTIME, "pnorm", mean = mean(dfNew$GESTTIME, na.rm=TRUE), sd = s
 Все тесты не отрицают, что признаки имеют нормальное распределение с уровнем 
 значимости 0.5.
 
-
---------------------------------------------------------------------
 ### Индивидуальное задание 1. 
 Опишем разницу между животными по степени опасности места, где они спят.
 ```{r, warning=FALSE, message = FALSE}
@@ -260,8 +241,6 @@ dfNew %>% ggplot(aes(y=GESTTIME, colour=EXP_IND)) + geom_boxplot()
 ```{r}
 dfNew1 <- dplyr::filter(dfNew, EXP_IND == 1)
 dfNew5 <- dplyr::filter(dfNew, EXP_IND == 5)
-df1 <- dplyr::filter(df, EXP_IND == 1)
-df5 <- dplyr::filter(df, EXP_IND == 5)
 
 length(dfNew1$NAME)
 length(dfNew5$NAME)
