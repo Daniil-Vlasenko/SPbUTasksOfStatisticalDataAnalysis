@@ -150,7 +150,7 @@ kurtosis(dfNew$GESTTIME, na.rm = TRUE)
 
 ## О виде распределений и о сравнении распределений.
 ### Индивидуальное задание 2.
-1. Проверим распределения признаков на нормальность.
+1 Проверим распределения признаков на нормальность.
 ```{r, warning=FALSE, message = FALSE}
 library(reshape)
 ```
@@ -202,41 +202,78 @@ ggplot(dfMelt, aes(sample = value)) +
         labs(x = "", y = "") +
         stat_qq_line(color = "blue")
 ```
-Похоже, что нормальность имеет место. Проверим это с помощью признаков.
+2. Похоже, что нормальность имеет место. Проверим это с помощью критериев.
 ```{r}
 library(nortest)
 ```
 
+У нас не так много повторений в выборке, чтобы не использовать критерий Пирсона, 
+но все ранво проведем его, скорее, ради академического интереса.
+Критерий Лиллиефорса - это модификация критерия Колмогорова-Смирнова для проверки
+сложных гипотез нормальности данных.
+Критерий Андерона-Дарлинга - это один из критериев типа w^2.
+Критерий Шапира-Уилка - примерно квадрат корреляции между x и y в n.p.p
 
-Используем критерий Андерсона-Дарлинга, который 
+Вес тела.
 ```{r}
+pearson.test(dfNew$BODY_WEI)
+lillie.test(dfNew$BODY_WEI)
 ad.test(dfNew$BODY_WEI)
 shapiro.test(dfNew$BODY_WEI)
-lillie.test(dfNew$BODY_WEI)
 ```
-Нормальность отверглась для быстрого сна. В академических целях используем
-менее мощный тест Лиллиефорса, который является модификацией теста
-Колмогорова-Смирнова для сложных гипотез.
 
-
-
-
-Используем критерий Колмогорова-Смирнова, так как распределения абсолютно 
-непрерывны.
-```{r, warning=FALSE, message = FALSE}
-ks.test(dfNew$BODY_WEI, "pnorm", mean = mean(dfNew$BODY_WEI, na.rm=TRUE), sd = sd(dfNew$BODY_WEI, na.rm=TRUE))
-ks.test(dfNew$BRAIN_WE, "pnorm", mean = mean(dfNew$BRAIN_WE, na.rm=TRUE), sd = sd(dfNew$BRAIN_WE, na.rm=TRUE))
-ks.test(dfNew$SLOWWAVE, "pnorm", mean = mean(dfNew$SLOWWAVE, na.rm=TRUE), sd = sd(dfNew$SLOWWAVE, na.rm=TRUE))
-ks.test(dfNew$PARADOX, "pnorm", mean = mean(dfNew$PARADOX, na.rm=TRUE), sd = sd(dfNew$PARADOX, na.rm=TRUE))
-ks.test(dfNew$SLEEP, "pnorm", mean = mean(dfNew$SLEEP, na.rm=TRUE), sd = sd(dfNew$SLEEP, na.rm=TRUE))
-ks.test(dfNew$LIFESPAN, "pnorm", mean = mean(dfNew$LIFESPAN, na.rm=TRUE), sd = sd(dfNew$LIFESPAN, na.rm=TRUE))
-ks.test(dfNew$GESTTIME, "pnorm", mean = mean(dfNew$GESTTIME, na.rm=TRUE), sd = sd(dfNew$GESTTIME, na.rm=TRUE))
+Вес мозга.
+```{r}
+pearson.test(dfNew$BRAIN_WE)
+lillie.test(dfNew$BRAIN_WE)
+ad.test(dfNew$BRAIN_WE)
+shapiro.test(dfNew$BRAIN_WE)
 ```
-Все тесты не отрицают, что признаки имеют нормальное распределение с уровнем 
-значимости 0.5.
+
+Медленный сон.
+```{r}
+pearson.test(dfNew$SLOWWAVE)
+lillie.test(dfNew$SLOWWAVE)
+ad.test(dfNew$SLOWWAVE)
+shapiro.test(dfNew$SLOWWAVE)
+```
+
+Быстрый сон.
+```{r}
+pearson.test(dfNew$PARADOX)
+lillie.test(dfNew$PARADOX)
+ad.test(dfNew$PARADOX)
+shapiro.test(dfNew$PARADOX)
+```
+
+Сон.
+```{r}
+pearson.test(dfNew$SLEEP)
+lillie.test(dfNew$SLEEP)
+ad.test(dfNew$SLEEP)
+shapiro.test(dfNew$SLEEP)
+```
+
+Продолжительность жизни.
+```{r}
+pearson.test(dfNew$LIFESPAN)
+lillie.test(dfNew$LIFESPAN)
+ad.test(dfNew$LIFESPAN)
+shapiro.test(dfNew$LIFESPAN)
+```
+
+Продолжительность периода вынашивания потомства.
+```{r}
+pearson.test(dfNew$GESTTIME)
+lillie.test(dfNew$GESTTIME)
+ad.test(dfNew$GESTTIME)
+shapiro.test(dfNew$GESTTIME)
+```
+Только несколько критериев отвергли нормальность распределений признаков с 
+уровнем значимости 0.05.
 
 ### Индивидуальное задание 1. 
-Опишем разницу между животными по степени опасности места, где они спят.
+3. Опишем разницу между животными по степени опасности места, где они спят.
 ```{r, warning=FALSE, message = FALSE}
 dfNew %>% ggplot(aes(y=BODY_WEI, colour=EXP_IND)) + geom_boxplot()
 dfNew %>% ggplot(aes(y=BRAIN_WE, colour=EXP_IND)) + geom_boxplot()
@@ -249,7 +286,6 @@ dfNew %>% ggplot(aes(y=GESTTIME, colour=EXP_IND)) + geom_boxplot()
 Можно заметить, что животные живущие в более защищенных местах 1,2) имеют меньший
 вес тела и мозга; 3,4,5) чаще дольше спят в общем и в разных фазах сна по отдельности;
 6,7) имеют менее длительные продолжительность жизни и период вынашивания потомства. 
-Проверим это с помощью критериев.
 
 Давайте проверим наблюдения 1,3) c помощью критериев для животных, живущих
 в ниболее и в наименее защищенных местах.
@@ -257,39 +293,71 @@ dfNew %>% ggplot(aes(y=GESTTIME, colour=EXP_IND)) + geom_boxplot()
 dfNew1 <- dplyr::filter(dfNew, EXP_IND == 1)
 dfNew5 <- dplyr::filter(dfNew, EXP_IND == 5)
 
-length(dfNew1$NAME)
-length(dfNew5$NAME)
+nrow(dfNew1)
+nrow(dfNew5)
 ```
-Ранее мы узнали, что признаки распределены нормально, но сейчас мы будем сравнивать
-разные группы индивидов, признаки внутри которых могут уже не имеют нормальность.
-Проверим это графически и тестами.
+
+4. Ранее мы узнали, что многие признаки распределены нормально, но сейчас мы будем 
+сравнивать разные группы индивидов, признаки внутри которых могут уже не имеют 
+нормальность. Проверим это графически и тестами.
 ```{r, warning=FALSE, message = FALSE}
 ggplot(dfNew1, aes(sample = BODY_WEI)) +
-        stat_pp_point(size = 1) +
+        stat_qq_point(size = 1) +
         labs(x = "", y = "") +
-        stat_pp_line(color = "blue")
+        stat_qq_line(color = "blue")
 ggplot(dfNew1, aes(sample = SLEEP)) +
-        stat_pp_point(size = 1) +
+        stat_qq_point(size = 1) +
         labs(x = "", y = "") +
-        stat_pp_line(color = "blue")
+        stat_qq_line(color = "blue")
 
 ggplot(dfNew5, aes(sample = BODY_WEI)) +
-        stat_pp_point(size = 1) +
+        stat_qq_point(size = 1) +
         labs(x = "", y = "") +
-        stat_pp_line(color = "blue")
+        stat_qq_line(color = "blue")
 ggplot(dfNew5, aes(sample = SLEEP)) +
-        stat_pp_point(size = 1) +
+        stat_qq_point(size = 1) +
         labs(x = "", y = "") +
-        stat_pp_line(color = "blue")
+        stat_qq_line(color = "blue")
 ```
-По графикам судить трудно. Используем тест Колмогорова-Смирнова.
-```{r}
-ks.test(dfNew1$BODY_WEI, "pnorm", mean = mean(dfNew1$BODY_WEI, na.rm=TRUE), sd = sd(dfNew1$BODY_WEI, na.rm=TRUE))
-ks.test(dfNew1$SLEEP, "pnorm", mean = mean(dfNew1$SLEEP, na.rm=TRUE), sd = sd(dfNew1$SLEEP, na.rm=TRUE))
+Используем те же критерии, что использовали ранее.
 
-ks.test(dfNew5$BODY_WEI, "pnorm", mean = mean(dfNew5$BODY_WEI, na.rm=TRUE), sd = sd(dfNew5$BODY_WEI, na.rm=TRUE))
-ks.test(dfNew5$SLEEP, "pnorm", mean = mean(dfNew5$SLEEP, na.rm=TRUE), sd = sd(dfNew5$SLEEP, na.rm=TRUE))
+Вес тела для животных, спящих в более защещенном месте.
+```{r}
+pearson.test(dfNew1$BODY_WEI)
+lillie.test(dfNew1$BODY_WEI)
+ad.test(dfNew1$BODY_WEI)
+shapiro.test(dfNew1$BODY_WEI)
 ```
+Сон для животных, спящих в более защещенном месте.
+```{r}
+pearson.test(dfNew1$SLEEP)
+lillie.test(dfNew1$SLEEP)
+ad.test(dfNew1$SLEEP)
+shapiro.test(dfNew1$SLEEP)
+```
+Вес тела для животных, спящих в менее защещенном месте.
+```{r}
+pearson.test(dfNew5$BODY_WEI)
+lillie.test(dfNew5$BODY_WEI)
+ad.test(dfNew5$BODY_WEI)
+shapiro.test(dfNew5$BODY_WEI)
+```
+Сон для животных, спящих в менее защещенном месте.
+```{r}
+pearson.test(dfNew5$SLEEP)
+lillie.test(dfNew5$SLEEP)
+ad.test(dfNew5$SLEEP)
+shapiro.test(dfNew5$SLEEP)
+```
+Нормальность отверглась с уровням значимости 0.05 толко для сная животных, 
+спящих в менее защищенном месте. Причем по всем критериям отверглась.
+
+
+
+
+
+
+--------------------------------------------------------------------------------
 Тесты не отвергли гипотезу о нормальности признаков внутри групп.
 
 Итак. Группы у нас независимые и  имеют нормальное распределение.
