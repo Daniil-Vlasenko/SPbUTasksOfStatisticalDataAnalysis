@@ -45,7 +45,9 @@ find_mode(df$LIFESPAN)
 find_mode(df$GESTTIME)
 ```
 Функция выводит моды (если их несколько), потом частоту. Видно, что проблемы 
-с округлением есть.
+с округлением есть. Продолжительность периода вынашивания потомства почти полностью
+состоит из целых чисел, поэтому будем ситать ее дискретным признаком. Остальные
+признаки будем считать непрерывными но с ошибками округления.
 
 4. Не актуально для текущих данных.
 5. Посмотрим на данные.
@@ -384,7 +386,7 @@ t.test(dfNew1$SLEEP, dfNew5$SLEEP, var.equal=FALSE, alternative="greate")
 ассимптотические. Как и предполагалось отверглись гипотезы в пользу того, 
 что мы наблюдали на box-plot-ах выше. Все отверглось как и предполагалось.
 
-5. Так как в случае сна удалось проверить гипотезу только асимптотическим критерием,
+5, 6. Так как в случае сна удалось проверить гипотезу только асимптотическим критерием,
 а выборкм у нас небольшие, воспользуемся непараметрическим t-критерием. А именно
 критерием Вилксона.
 ```{r}
@@ -401,9 +403,32 @@ ks.test(dfNew1$SLEEP, dfNew5$SLEEP)
 ```
 Гипотезы так же отверглись.
 
+7. Устное задание.
+8. Не актуально для текущих данных.
+
 # Об анализе зависимостей
 ## Индивидуальное задание 3.
-Посмотрим на корреляции между признаками.
+1. Посмотрим еще раз на ggpairs plot.
+```{r, message=FALSE, warning=FALSE}
+dfNew %>% dplyr::select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), 
+          columns = c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "PARADOX", "SLEEP", "LIFESPAN", "GESTTIME"))
+dfNew %>% dplyr::select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), aes(colour=PRED_IND), legend=1,
+          columns=c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "PARADOX", "SLEEP", "LIFESPAN", "GESTTIME"))
+dfNew %>% dplyr::select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), aes(colour=EXP_IND), legend=1,
+          columns=c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "PARADOX", "SLEEP", "LIFESPAN", "GESTTIME"))
+dfNew %>% dplyr::select(-NAME) %>%
+  ggpairs(diag=list(continuous = "barDiag"), aes(colour=DANG_IND), legend=1,
+          columns=c("BODY_WEI", "BRAIN_WE", "SLOWWAVE", "PARADOX", "SLEEP", "LIFESPAN", "GESTTIME"))
+```
+Можно заметить 1) положительную корреляцию веса тела, веса мозга продолжительности
+жизни и периода вынашивания потомства, 2) положительную корреляцию корреляцию фаз 
+сна и сна в общем смысле, 3) отрицательную корреляцию всего, что было перечислено
+в пункте 1), со всем, что было перечислено в пункте 2).
+
+2. Посмотрим на линейные корреляции между признаками.
 ```{r, warning=FALSE, message = FALSE}
 dplyr::select(dfNew, -NAME) %>%
 mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
@@ -415,7 +440,14 @@ ggplot(aes(X1, X2)) +
   scale_fill_gradient2(low=colors()[555], mid=colors()[1], high=colors()[26]) + 
   ggtitle("dfNew pearson") +
   theme(axis.text.x = element_text(angle = 50, hjust = 1))
+```
+Видим подтверждение того, что наблюдали на ggpairs, еще заметны отрицательные 
+корреляции индексов и сна. То есть чем в большей опасности находиться животное, 
+тем меньше оно спит. Еще заметна сильная корреляция между размерами животного и
+незащищенностью места, где оно спит.
 
+3. Теперь посмотрим на ранговоые корреляции между прихнаками.
+```{r, warning=FALSE, message = FALSE}
 dplyr::select(dfNew, -NAME) %>%
 mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
 cor(method = "spearman", use = "pairwise.complete.obs") %>%
@@ -427,7 +459,11 @@ ggplot(aes(X1, X2)) +
   ggtitle("dfNew spearman") +
   theme(axis.text.x = element_text(angle = 50, hjust = 1))
 ```
-Также посчитаем интересные частные корреляции.
+Больших изменений нет. Где-то значение корреляции стало чуть меньше, где-то чуть 
+больше. Это связано с тем, что некоторые зависимости лучше описывабтся линейно,
+некоторые хуже.
+
+4. Также посчитаем интересные частные корреляции.
 ```{r, warning=FALSE, message = FALSE}
 library(ppcor)
 ```
@@ -513,6 +549,9 @@ as.data.frame())["SLOWWAVE", "DANG_IND"]
 as.data.frame())["PARADOX", "DANG_IND"]
 ```
 
-
+Итог. 1) Животные с большим весом спят меньше и в более опасных местах. Второе логично, 
+потому что они не могут залеть в дупло, первое контринтуитивно, но гугл подверждает 
+этот факт, причина его пока не известна. 2) Животные, находящиеся в большей опасности 
+во время сна спят меньше, тоже логично.
 
 
