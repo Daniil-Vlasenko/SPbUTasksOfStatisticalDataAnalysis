@@ -32,28 +32,41 @@ nrow(df)
 
 3\. Кроме индексов-факторов, все признаки количественные. Индексы - порядковые признаки.
 Все количественные признаки непрерывные, но можно заметить дискретизацию при округлении.
-Проверим это, посмотрев на частоты мод.
+Проверим это, посмотрев на частоты мод и повторов.
 ```{r}
-find_mode <- function(x) {
+mode_rate <- function(x) {
   x <- x[!is.na(x)]
   u <- unique(x)
   tab <- tabulate(match(x, u))
-  c(u[tab == max(tab)],  max(tab))
+  max(tab) / length(x)
 }
 
-find_mode(df$BODY_WEI)
-find_mode(df$BRAIN_WE)
-find_mode(df$SLOWWAVE)
-find_mode(df$PARADOX)
-find_mode(df$SLEEP)
-find_mode(df$LIFESPAN)
-find_mode(df$GESTTIME)
+repeat_rate <- function(x) {
+  x <- x[!is.na(x)]
+  u <- unique(x)
+  (length(x) - length(u)) / length(x)
+}
+
+cat("Отношение частоты моды к числу элементов для BODY_WEI:", mode_fashion(df$BODY_WEI), 
+    "\nОтношение частоты повторных элементов к числу элементов для BODY_WEI:", repeat_rate(df$BODY_WEI))
+cat("\n\nОтношение частоты моды к числу элементов для BRAIN_WE:", mode_fashion(df$BRAIN_WE), 
+    "\nОтношение частоты повторных элементов к числу элементов для BRAIN_WE:", repeat_rate(df$BRAIN_WE))
+cat("\n\nОтношение частоты моды к числу элементов для SLOWWAVE:", mode_fashion(df$SLOWWAVE), 
+    "\nОтношение частоты повторных элементов к числу элементов для SLOWWAVE:", repeat_rate(df$SLOWWAVE))
+cat("\n\nОтношение частоты моды к числу элементов для PARADOX:", mode_fashion(df$PARADOX), 
+    "\nОтношение частоты повторных элементов к числу элементов для PARADOX:", repeat_rate(df$PARADOX))
+cat("\n\nОтношение частоты моды к числу элементов для SLEEP:", mode_fashion(df$SLEEP), 
+    "\nОтношение частоты повторных элементов к числу элементов для SLEEP:", repeat_rate(df$SLEEP))
+cat("\n\nОтношение частоты моды к числу элементов для LIFESPAN:", mode_fashion(df$LIFESPAN), 
+    "\nОтношение частоты повторных элементов к числу элементов  для LIFESPAN:", repeat_rate(df$LIFESPAN))
+cat("\n\nОтношение частоты моды к числу элементов для GESTTIME:", mode_fashion(df$GESTTIME), 
+    "\nОтношение частоты повторных элементов к числу элементов для GESTTIME:", repeat_rate(df$GESTTIME))
 ```
 
-Функция выводит моды (если их несколько), потом частоту. Видно, что проблемы 
-с округлением есть. Продолжительность периода вынашивания потомства почти полностью
-состоит из целых чисел, поэтому будем считать ее дискретным признаком. Остальные
-признаки будем считать непрерывными но с ошибками округления.
+Будем считать данные дискретными если отношение частоты моды к числу элементов 
+больше 10%, а отношение частоты повторных элементов к числу элементов больше 15%.
+Тогда BODY_WEI, BRAIN_WE будут непрерывными, а BRAIN_WE, PARADOX, SLEEP, LIFESPAN, 
+GESTTIME дискретными.
 
 4\. Не актуально для текущих данных.
 
@@ -104,70 +117,65 @@ dfNew %>% dplyr::select(-NAME) %>%
 10\. Используем описательные статистики для распределений признаков в новой выборке.
 ```{r}
 library(moments)
-library(entropy)
+```
+
+```{r}
+info <- function(x) {
+  c(mean(x, na.rm = TRUE), 
+    median(x, na.rm = TRUE),
+    var(x, na.rm = TRUE),
+    skewness(x, na.rm = TRUE),
+    kurtosis(x, na.rm = TRUE))
+}
 ```
 
 Вес тела.
 ```{r}
-mean(dfNew$BODY_WEI, na.rm = TRUE)
-quantile(dfNew$BODY_WEI, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(dfNew$BODY_WEI, na.rm = TRUE)
-skewness(dfNew$BODY_WEI, na.rm = TRUE)
-kurtosis(dfNew$BODY_WEI, na.rm = TRUE)
+x <- info(dfNew$BODY_WEI)
+cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
+    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
 ```
 
 Вес мозга.
 ```{r}
-mean(dfNew$BRAIN_WE, na.rm = TRUE)
-quantile(dfNew$BRAIN_WE, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(dfNew$BRAIN_WE, na.rm = TRUE)
-skewness(dfNew$BRAIN_WE, na.rm = TRUE)
-kurtosis(dfNew$BRAIN_WE, na.rm = TRUE)
+x <- info(dfNew$BRAIN_WE)
+cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
+    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
 ```
 
 Медленный сон.
 ```{r}
-mean(dfNew$SLOWWAVE, na.rm = TRUE)
-quantile(dfNew$SLOWWAVE, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(dfNew$SLOWWAVE, na.rm = TRUE)
-skewness(dfNew$SLOWWAVE, na.rm = TRUE)
-kurtosis(dfNew$SLOWWAVE, na.rm = TRUE)
+x <- info(dfNew$SLOWWAVE)
+cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
+    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
 ```
 
 Быстрый сон.
 ```{r}
-mean(dfNew$PARADOX, na.rm = TRUE)
-quantile(dfNew$PARADOX, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(dfNew$PARADOX, na.rm = TRUE)
-skewness(dfNew$PARADOX, na.rm = TRUE)
-kurtosis(dfNew$PARADOX, na.rm = TRUE)
+x <- info(dfNew$PARADOX)
+cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
+    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
 ```
 
 Cон.
 ```{r}
-mean(dfNew$SLEEP, na.rm = TRUE)
-quantile(dfNew$SLEEP, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(dfNew$SLEEP, na.rm = TRUE)
-skewness(dfNew$SLEEP, na.rm = TRUE)
-kurtosis(dfNew$SLEEP, na.rm = TRUE)
+x <- info(dfNew$SLEEP)
+cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
+    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
 ```
 
 Продолжительность жизни.
 ```{r}
-mean(dfNew$LIFESPAN, na.rm = TRUE)
-quantile(dfNew$LIFESPAN, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(dfNew$LIFESPAN, na.rm = TRUE)
-skewness(dfNew$LIFESPAN, na.rm = TRUE)
-kurtosis(dfNew$LIFESPAN, na.rm = TRUE)
+x <- info(dfNew$LIFESPAN)
+cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
+    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
 ```
 
 Продолжительность периода вынашивания потомства.
 ```{r}
-mean(dfNew$GESTTIME, na.rm = TRUE)
-quantile(dfNew$GESTTIME, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-var(dfNew$GESTTIME, na.rm = TRUE)
-skewness(dfNew$GESTTIME, na.rm = TRUE)
-kurtosis(dfNew$GESTTIME, na.rm = TRUE)
+x <- info(dfNew$GESTTIME)
+cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
+    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
 ```
 
 # О виде распределений и о сравнении распределений.
