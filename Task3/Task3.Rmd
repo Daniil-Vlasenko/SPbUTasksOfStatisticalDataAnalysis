@@ -7,6 +7,7 @@ output:
 date: "2022-11-11"
 ---
 
+
 # Предварительный анализ данных. 
 1\. Описание признаков присутствует в сопроводительном файле. Прочитаем данные. 
 Среди данных не может быть отрицательных значений, NA обозначаются как -999.
@@ -48,21 +49,22 @@ repeat_rate <- function(x) {
 }
 ```
 
+Отношение частоты моды к числу элементов:
+
 ```{r}
-cat("Отношение частоты моды к числу элементов для BODY_WEI:", mode_rate(df$BODY_WEI), 
-    "\nОтношение частоты повторных элементов к числу элементов для BODY_WEI:", repeat_rate(df$BODY_WEI))
-cat("Отношение частоты моды к числу элементов для BRAIN_WE:", mode_rate(df$BRAIN_WE), 
-    "\nОтношение частоты повторных элементов к числу элементов для BRAIN_WE:", repeat_rate(df$BRAIN_WE))
-cat("Отношение частоты моды к числу элементов для SLOWWAVE:", mode_rate(df$SLOWWAVE), 
-    "\nОтношение частоты повторных элементов к числу элементов для SLOWWAVE:", repeat_rate(df$SLOWWAVE))
-cat("Отношение частоты моды к числу элементов для PARADOX:", mode_rate(df$PARADOX), 
-    "\nОтношение частоты повторных элементов к числу элементов для PARADOX:", repeat_rate(df$PARADOX))
-cat("Отношение частоты моды к числу элементов для SLEEP:", mode_rate(df$SLEEP), 
-    "\nОтношение частоты повторных элементов к числу элементов для SLEEP:", repeat_rate(df$SLEEP))
-cat("Отношение частоты моды к числу элементов для LIFESPAN:", mode_rate(df$LIFESPAN), 
-    "\nОтношение частоты повторных элементов к числу элементов  для LIFESPAN:", repeat_rate(df$LIFESPAN))
-cat("Отношение частоты моды к числу элементов для GESTTIME:", mode_rate(df$GESTTIME), 
-    "\nОтношение частоты повторных элементов к числу элементов для GESTTIME:", repeat_rate(df$GESTTIME))
+df %>% summarise(BODY_WEI = round(mode_rate(BODY_WEI), 3), BRAIN_WE = round(mode_rate(BRAIN_WE), 3), 
+                SLOWWAVE = round(mode_rate(SLOWWAVE), 3), PARADOX = round(mode_rate(PARADOX), 3), 
+                SLEEP = round(mode_rate(SLEEP), 3), LIFESPAN = round(mode_rate(LIFESPAN), 3), 
+                GESTTIME = round(mode_rate(GESTTIME), 3))
+```
+
+Отношение частоты повторных элементов к числу элементов:
+
+```{r}
+df %>% summarise(BODY_WEI = round(repeat_rate(BODY_WEI), 3), BRAIN_WE = round(repeat_rate(BRAIN_WE), 3), 
+                SLOWWAVE = round(repeat_rate(SLOWWAVE), 3), PARADOX = round(repeat_rate(PARADOX), 3), 
+                SLEEP = round(repeat_rate(SLEEP), 3), LIFESPAN = round(repeat_rate(LIFESPAN), 3), 
+                GESTTIME = round(repeat_rate(GESTTIME), 3))
 ```
 
 Будем считать данные дискретными если отношение частоты моды к числу элементов 
@@ -144,62 +146,15 @@ library(moments)
 ```
 
 ```{r}
-info <- function(x) {
-  c(mean(x, na.rm = TRUE), 
-    median(x, na.rm = TRUE),
-    var(x, na.rm = TRUE),
-    skewness(x, na.rm = TRUE),
-    kurtosis(x, na.rm = TRUE))
+characteristics <- function(x) {
+  c(mean = round(mean(x, na.rm = TRUE), 3),
+    median = round(median(x, na.rm = TRUE), 3),
+    var = round(var(x, na.rm = TRUE), 3),
+    skewness = round(skewness(x, na.rm = TRUE), 3),
+    kurtosis = round(kurtosis(x, na.rm = TRUE) - 3, 3))
 }
-```
 
-Вес тела.
-```{r}
-x <- info(dfNew$BODY_WEI)
-cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
-    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
-```
-
-Вес мозга.
-```{r}
-x <- info(dfNew$BRAIN_WE)
-cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
-    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
-```
-
-Медленный сон.
-```{r}
-x <- info(dfNew$SLOWWAVE)
-cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
-    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
-```
-
-Быстрый сон.
-```{r}
-x <- info(dfNew$PARADOX)
-cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
-    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
-```
-
-Cон.
-```{r}
-x <- info(dfNew$SLEEP)
-cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
-    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
-```
-
-Продолжительность жизни.
-```{r}
-x <- info(dfNew$LIFESPAN)
-cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
-    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
-```
-
-Продолжительность периода вынашивания потомства.
-```{r}
-x <- info(dfNew$GESTTIME)
-cat("Среднее:", x[1], "\nВыб. медиана:", x[2], "\nВыб. дисперсия:", x[3], 
-    "\nВыб. коэфф. ассиментрии:", x[4], "\nВыб. коэфф. эксцесса:", x[5])
+data.frame(lapply(as.list(dfNew[2:8]), characteristics)) %>% t()
 ```
 
 # О виде распределений и о сравнении распределений.
@@ -272,60 +227,16 @@ library(nortest)
 Критерий Андерона-Дарлинга - это один из критериев типа w^2.
 Критерий Шапира-Уилка - примерно квадрат корреляции между x и y в n.p.p.
 
-Вес тела.
 ```{r}
-pearson.test(dfNew$BODY_WEI)
-lillie.test(dfNew$BODY_WEI)
-ad.test(dfNew$BODY_WEI)
-shapiro.test(dfNew$BODY_WEI)
-```
+normality.tests <- function(x) {
+  c(Pearson = pearson.test(x)$p,
+    Lilliefors =lillie.test(x)$p,
+    Anderson.Darling = ad.test(x)$p,
+    Shapiro.Wilk = shapiro.test(x)$p)
+}
 
-Вес мозга.
-```{r}
-pearson.test(dfNew$BRAIN_WE)
-lillie.test(dfNew$BRAIN_WE)
-ad.test(dfNew$BRAIN_WE)
-shapiro.test(dfNew$BRAIN_WE)
-```
-
-Медленный сон.
-```{r}
-pearson.test(dfNew$SLOWWAVE)
-lillie.test(dfNew$SLOWWAVE)
-ad.test(dfNew$SLOWWAVE)
-shapiro.test(dfNew$SLOWWAVE)
-```
-
-Быстрый сон.
-```{r}
-pearson.test(dfNew$PARADOX)
-lillie.test(dfNew$PARADOX)
-ad.test(dfNew$PARADOX)
-shapiro.test(dfNew$PARADOX)
-```
-
-Сон.
-```{r}
-pearson.test(dfNew$SLEEP)
-lillie.test(dfNew$SLEEP)
-ad.test(dfNew$SLEEP)
-shapiro.test(dfNew$SLEEP)
-```
-
-Продолжительность жизни.
-```{r}
-pearson.test(dfNew$LIFESPAN)
-lillie.test(dfNew$LIFESPAN)
-ad.test(dfNew$LIFESPAN)
-shapiro.test(dfNew$LIFESPAN)
-```
-
-Продолжительность периода вынашивания потомства.
-```{r}
-pearson.test(dfNew$GESTTIME)
-lillie.test(dfNew$GESTTIME)
-ad.test(dfNew$GESTTIME)
-shapiro.test(dfNew$GESTTIME)
+options(scipen=999)
+data.frame(lapply(as.list(dfNew[2:8]), normality.tests)) %>% t()
 ```
 
 Гипотеза о нормальности распределения для быстрого сна отвергается многими 
@@ -398,7 +309,7 @@ nrow(dfNew5)
 
 Ранее мы узнали, что многие признаки распределены нормально, но сейчас мы будем 
 сравнивать разные группы индивидов, признаки внутри которых могут уже не имеют 
-нормальность. Проверим это графически и критериями
+нормальность. Проверим это графически и критериями.
 ```{r, warning=FALSE, message = FALSE}
 ggplot(dfNew1, aes(sample = BODY_WEI)) +
         stat_qq_point(size = 1) +
@@ -429,6 +340,10 @@ ad.test(dfNew1$BODY_WEI)
 shapiro.test(dfNew1$BODY_WEI)
 ```
 
+|         | Pearson | Lilliefors | Anderson-Darling | Shapiro-Wilk |
+|:-------:|:------------:|:-----------:|:-------:|:------------:|
+| p-value |    0.07419   |    0.4219   |  0.3014 |    0.2459    |
+
 Сон для животных, спящих в более защищенном месте.
 ```{r}
 pearson.test(dfNew1$SLEEP)
@@ -437,6 +352,10 @@ ad.test(dfNew1$SLEEP)
 shapiro.test(dfNew1$SLEEP)
 ```
 
+|         | Pearson | Lilliefors | Anderson-Darling | Shapiro-Wilk |
+|:-------:|:------------:|:-----------:|:-------:|:------------:|
+| p-value |    0.07419   |    0.4219   |  0.3014 |    0.2459    |
+
 Вес тела для животных, спящих в менее защищенном месте.
 ```{r}
 pearson.test(dfNew5$BODY_WEI)
@@ -444,6 +363,11 @@ lillie.test(dfNew5$BODY_WEI)
 ad.test(dfNew5$BODY_WEI)
 shapiro.test(dfNew5$BODY_WEI)
 ```
+
+|         | Pearson | Lilliefors | Anderson-Darling | Shapiro-Wilk |
+|:-------:|:------------:|:-----------:|:-------:|:------------:|
+| p-value |    0.3685    |    0.7872   |  0.9112 |    0.9922    |
+
 Сон для животных, спящих в менее защищенном месте.
 ```{r}
 pearson.test(dfNew5$SLEEP)
@@ -451,6 +375,10 @@ lillie.test(dfNew5$SLEEP)
 ad.test(dfNew5$SLEEP)
 shapiro.test(dfNew5$SLEEP)
 ```
+
+|         | Pearson | Lilliefors |  Anderson-Darling | Shapiro-Wilk |
+|:-------:|:------------:|:-----------:|:--------:|:------------:|
+| p-value |   0.008887   |  0.0004679  | 0.004763 |    0.00526   |
 
 Нормальность отверглась с уровням значимости 0.05 толко для сная животных, 
 спящих в менее защищенном месте. Причем по всем критериям отверглась. 
@@ -473,6 +401,11 @@ t.test(abs(dfNew1$SLEEP - mean(dfNew1$SLEEP, na.rm = TRUE)),
        abs(dfNew5$SLEEP - mean(dfNew5$SLEEP, na.rm = TRUE)))
 ```
 
+|          |  Fisher | Welch Two Sample t-test |
+|:--------:|:-------:|:-----------------------:|
+| BODY_WEI |  0.4445 |          0.2866         |
+|   SLEEP  | 0.01559 |         0.004973        |
+
 Гипотеза о равных дисперсиях не отверглась для веса, а для сна отверглась с 
 уровнем значимости 0.05.
 
@@ -485,17 +418,27 @@ t.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI, var.equal=FALSE, alternative="less")
 t.test(dfNew1$SLEEP, dfNew5$SLEEP, var.equal=FALSE, alternative="greate")
 ```
 
+|   | Two Sample t-test | Welch Two Sample t-test |
+|:--------:|:-----------------:|:-----------------------:|
+| BODY_WEI |     3.022e-07     |        2.368e-07        |
+|   SLEEP  |     6.464e-08     |        8.383e-11        |
+
 Первый критерий точный, второй используется не по назначению (так как дисперсии разные), 
 третий и четвертный ассимптотические. Как и предполагалось отверглись гипотезы в 
 пользу того, что мы наблюдали на box-plot-ах выше.
 
 5,6\. Так как в случае сна удалось проверить гипотезу только асимптотическим критерием,
-а выборки у нас небольшие, воспользуемся непараметрическим t-критерием. А именно
-критерием Вилксона.
+а выборки у нас небольшие, воспользуемся другими критериями. Выбросов у нас нет,
+но все же используем критерий Уолкоксона ради академического интереса.
 ```{r, warning=FALSE, message = FALSE}
 wilcox.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI, alternative="less", paired=FALSE)
 wilcox.test(dfNew1$SLEEP, dfNew5$SLEEP, alternative="greate", paired=FALSE)
 ```
+
+|   | wilcox.test |
+|:--------:|:-----------:|
+| BODY_WEI |  1.092e-05  |
+|   SLEEP  |  5.015e-06  |
 
 Мощность у этого критерия меньшая, но гипотезы так же отверглись.
 
@@ -505,6 +448,11 @@ wilcox.test(dfNew1$SLEEP, dfNew5$SLEEP, alternative="greate", paired=FALSE)
 ks.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI)
 ks.test(dfNew1$SLEEP, dfNew5$SLEEP)
 ```
+
+|   |  ks.test  |
+|:--------:|:---------:|
+| BODY_WEI | 0.0001416 |
+|   SLEEP  | 4.414e-05 |
 
 Гипотезы так же отверглись.
 
@@ -570,7 +518,7 @@ ggplot(aes(X1, X2)) +
 ```
 
 Видим подтверждение того, что наблюдали на ggpairs, еще заметны отрицательные 
-корреляции индексов и сна. То есть чем в большей опасности находиться животное, 
+корреляции индексов и сна. То есть чем в большей опасности находится животное, 
 тем меньше оно спит. Еще заметна сильная корреляция между размерами животного и
 незащищенностью места, где оно спит.
 
@@ -591,12 +539,21 @@ ggplot(aes(X1, X2)) +
 Больших изменений нет (так как у нас нет выбросов и распределения близкие к 
 нормальным). 
 
-4\. Также посчитаем интересные частные корреляции. (НУЖНО ПОВТОРИТЬ ТЕОРИЮ)
+4\. Также посчитаем интересные частные корреляции. 
 ```{r, warning=FALSE, message = FALSE}
 library(ppcor)
 ```
 
-Посмотрим на частную корреляцию веса животного и сна за вычетом идексов опасности.
+Посмотрим на частную корреляцию веса животного и сна за вычетом идексов 
+опасности и на частную корреляцию степени защищенности животного во время сна и 
+сна за вычетом веса и связанных с ним критериев.
+
+Это будет иметь смысл, так как между индексами и весом/сном коэффициент Пирсона 
+значим, то есть есть линейная зависимость между индексами и весом/сном, которая
+будет вычитаться при подсчете частных корреляций.
+
+Частая корреляция веса животного и сна за вычетом идексов опасности.
+
 ```{r, warning=FALSE, message = FALSE}
 ((dplyr::select(dfNew, -NAME, -BRAIN_WE, -LIFESPAN, -GESTTIME, -SLOWWAVE, -PARADOX) %>%
   mutate(PRED_IND = as.numeric(PRED_IND), EXP_IND = as.numeric(EXP_IND), DANG_IND = as.numeric(DANG_IND)) %>%
@@ -605,8 +562,12 @@ library(ppcor)
 as.data.frame())["SLEEP", "BODY_WEI"]
 ```
 
-Посмотрим на частые корреляцию степени защищенности животного во время сна  и 
+Отрицательная корреляции между сном и весом животного остается. Животные с 
+большим весом спят меньше.
+
+Часнтая корреляция степени защищенности животного во время сна  и 
 сна за вычетом веса и связанных с ним критериев.
+
 ```{r, warning=FALSE, message = FALSE}
 ((dplyr::select(dfNew, -NAME, -PRED_IND, -DANG_IND, -SLOWWAVE, -PARADOX) %>%
   mutate(EXP_IND = as.numeric(EXP_IND)) %>%
@@ -615,11 +576,5 @@ as.data.frame())["SLEEP", "BODY_WEI"]
 as.data.frame())["SLEEP", "EXP_IND"]
 ```
 
-
-1. Животные с большим весом спят меньше и в более опасных местах. Второе логично, 
-потому что они не могут залеть в дупло, первое контринтуитивно, но гугл подверждает 
-этот факт, причина его пока не известна. 
-2. Животные, находящиеся в большей опасности 
-во время сна, спят меньше, тоже логично.
-
-
+Отрицательная корреляция между сном и индексом защищенности животного во время сна
+остается. Животные, находящиеся в большей опасности во время сна, спят меньше.
