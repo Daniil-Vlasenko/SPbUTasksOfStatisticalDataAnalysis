@@ -229,13 +229,12 @@ library(nortest)
 
 ```{r}
 normality.tests <- function(x) {
-  c(Pearson = pearson.test(x)$p,
-    Lilliefors =lillie.test(x)$p,
-    Anderson.Darling = ad.test(x)$p,
-    Shapiro.Wilk = shapiro.test(x)$p)
+  c(Pearson = round(pearson.test(x)$p, 5),
+    Lilliefors = round(lillie.test(x)$p, 5),
+    Anderson.Darling = round(ad.test(x)$p, 5),
+    Shapiro.Wilk = round(shapiro.test(x)$p, 5))
 }
 
-options(scipen=999)
 data.frame(lapply(as.list(dfNew[2:8]), normality.tests)) %>% t()
 ```
 
@@ -309,7 +308,7 @@ nrow(dfNew5)
 
 Ранее мы узнали, что многие признаки распределены нормально, но сейчас мы будем 
 сравнивать разные группы индивидов, признаки внутри которых могут уже не имеют 
-нормальность. Проверим это графически и критериями.
+нормальность. 
 ```{r, warning=FALSE, message = FALSE}
 ggplot(dfNew1, aes(sample = BODY_WEI)) +
         stat_qq_point(size = 1) +
@@ -333,52 +332,25 @@ ggplot(dfNew5, aes(sample = SLEEP)) +
 Используем те же критерии, что использовали ранее.
 
 Вес тела для животных, спящих в более защищенном месте.
-```{r}
-pearson.test(dfNew1$BODY_WEI)
-lillie.test(dfNew1$BODY_WEI)
-ad.test(dfNew1$BODY_WEI)
-shapiro.test(dfNew1$BODY_WEI)
-```
 
-|         | Pearson | Lilliefors | Anderson-Darling | Shapiro-Wilk |
-|:-------:|:------------:|:-----------:|:-------:|:------------:|
-| p-value |    0.07419   |    0.4219   |  0.3014 |    0.2459    |
+```{r}
+normality.tests(dfNew1$BODY_WEI)
+```
 
 Сон для животных, спящих в более защищенном месте.
 ```{r}
-pearson.test(dfNew1$SLEEP)
-lillie.test(dfNew1$SLEEP)
-ad.test(dfNew1$SLEEP)
-shapiro.test(dfNew1$SLEEP)
+normality.tests(dfNew1$SLEEP)
 ```
-
-|         | Pearson | Lilliefors | Anderson-Darling | Shapiro-Wilk |
-|:-------:|:------------:|:-----------:|:-------:|:------------:|
-| p-value |    0.07419   |    0.4219   |  0.3014 |    0.2459    |
 
 Вес тела для животных, спящих в менее защищенном месте.
 ```{r}
-pearson.test(dfNew5$BODY_WEI)
-lillie.test(dfNew5$BODY_WEI)
-ad.test(dfNew5$BODY_WEI)
-shapiro.test(dfNew5$BODY_WEI)
+normality.tests(dfNew5$BODY_WEI)
 ```
-
-|         | Pearson | Lilliefors | Anderson-Darling | Shapiro-Wilk |
-|:-------:|:------------:|:-----------:|:-------:|:------------:|
-| p-value |    0.3685    |    0.7872   |  0.9112 |    0.9922    |
 
 Сон для животных, спящих в менее защищенном месте.
 ```{r}
-pearson.test(dfNew5$SLEEP)
-lillie.test(dfNew5$SLEEP)
-ad.test(dfNew5$SLEEP)
-shapiro.test(dfNew5$SLEEP)
+normality.tests(dfNew5$SLEEP)
 ```
-
-|         | Pearson | Lilliefors |  Anderson-Darling | Shapiro-Wilk |
-|:-------:|:------------:|:-----------:|:--------:|:------------:|
-| p-value |   0.008887   |  0.0004679  | 0.004763 |    0.00526   |
 
 Нормальность отверглась с уровням значимости 0.05 толко для сная животных, 
 спящих в менее защищенном месте. Причем по всем критериям отверглась. 
