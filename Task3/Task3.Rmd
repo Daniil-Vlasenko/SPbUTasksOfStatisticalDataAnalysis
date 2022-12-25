@@ -363,37 +363,50 @@ normality.tests(dfNew5$SLEEP)
 Для веса тела можно использовать критерий Фишера, а для сна нельзя, так как для сна 
 не выполняется нормальность, поэтому ему доверять не будем, но проведем ради 
 академического интереса. Так же используем критерий Левена с модулями.
-```{r}
-var.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI)
-var.test(dfNew1$SLEEP, dfNew5$SLEEP)
 
-t.test(abs(dfNew1$BODY_WEI - mean(dfNew1$BODY_WEI, na.rm = TRUE)), 
-       abs(dfNew5$BODY_WEI - mean(dfNew5$BODY_WEI, na.rm = TRUE)))
-t.test(abs(dfNew1$SLEEP - mean(dfNew1$SLEEP, na.rm = TRUE)), 
-       abs(dfNew5$SLEEP - mean(dfNew5$SLEEP, na.rm = TRUE)))
+```{r}
+var.tests <- function(x, y) {
+  c(Fisher = round(var.test(x, y)$p.value, 5),
+    Levene = round(t.test(abs(x - mean(x, na.rm = TRUE)), 
+                          abs(y - mean(y, na.rm = TRUE)))$p.value, 5))
+}
 ```
 
-|          |  Fisher | Welch Two Sample t-test |
-|:--------:|:-------:|:-----------------------:|
-| BODY_WEI |  0.4445 |          0.2866         |
-|   SLEEP  | 0.01559 |         0.004973        |
+Вес тела:
+
+```{r}
+var.tests(dfNew1$BODY_WEI, dfNew5$BODY_WEI)
+```
+
+Сон:
+
+```{r}
+var.tests(dfNew1$SLEEP, dfNew5$SLEEP)
+```
 
 Гипотеза о равных дисперсиях не отверглась для веса, а для сна отверглась с 
 уровнем значимости 0.05.
 
 Посмотрим на t-критерии с равными и неравными дисперсиями для независимых выборок.
-```{r}
-t.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI, var.equal=TRUE, alternative="less")
-t.test(dfNew1$SLEEP, dfNew5$SLEEP, var.equal=TRUE, alternative="greate")
 
-t.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI, var.equal=FALSE, alternative="less")
-t.test(dfNew1$SLEEP, dfNew5$SLEEP, var.equal=FALSE, alternative="greate")
+```{r}
+t.tests <- function(x, y) {
+  c(Two.sample.t.test = t.test(x, y, var.equal=TRUE)$p.value,
+    Welch.two.sample.t.test = t.test(x, y, var.equal=FALSE)$p.value)
+}
 ```
 
-|   | Two Sample t-test | Welch Two Sample t-test |
-|:--------:|:-----------------:|:-----------------------:|
-| BODY_WEI |     3.022e-07     |        2.368e-07        |
-|   SLEEP  |     6.464e-08     |        8.383e-11        |
+Вес тела:
+
+```{r}
+t.tests(dfNew1$BODY_WEI, dfNew5$BODY_WEI)
+```
+
+Сон:
+
+```{r}
+t.tests(dfNew1$SLEEP, dfNew5$SLEEP)
+```
 
 Первый критерий точный, второй используется не по назначению (так как дисперсии разные), 
 третий и четвертный ассимптотические. Как и предполагалось отверглись гипотезы в 
@@ -402,29 +415,35 @@ t.test(dfNew1$SLEEP, dfNew5$SLEEP, var.equal=FALSE, alternative="greate")
 5,6\. Так как в случае сна удалось проверить гипотезу только асимптотическим критерием,
 а выборки у нас небольшие, воспользуемся другими критериями. Выбросов у нас нет,
 но все же используем критерий Уолкоксона ради академического интереса.
+
+Вес:
+
 ```{r, warning=FALSE, message = FALSE}
-wilcox.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI, alternative="less", paired=FALSE)
-wilcox.test(dfNew1$SLEEP, dfNew5$SLEEP, alternative="greate", paired=FALSE)
+wilcox.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI, paired=FALSE)$p.value
 ```
 
-|   | wilcox.test |
-|:--------:|:-----------:|
-| BODY_WEI |  1.092e-05  |
-|   SLEEP  |  5.015e-06  |
+Сон:
+
+```{r, warning=FALSE, message = FALSE}
+wilcox.test(dfNew1$SLEEP, dfNew5$SLEEP, paired=FALSE)$p.value
+```
 
 Мощность у этого критерия меньшая, но гипотезы так же отверглись.
 
 7\. Наконец используем двухвыборочный критерий Колмогорова-Смирнова, который имеет 
 меньшую мощность, но у которого более общая альтернативная гипотеза.
+
+Вес:
+
 ```{r, warning=FALSE, message = FALSE}
-ks.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI)
-ks.test(dfNew1$SLEEP, dfNew5$SLEEP)
+ks.test(dfNew1$BODY_WEI, dfNew5$BODY_WEI)$p.value
 ```
 
-|   |  ks.test  |
-|:--------:|:---------:|
-| BODY_WEI | 0.0001416 |
-|   SLEEP  | 4.414e-05 |
+Сон:
+
+```{r, warning=FALSE, message = FALSE}
+ks.test(dfNew1$SLEEP, dfNew5$SLEEP)$p.value
+```
 
 Гипотезы так же отверглись.
 
